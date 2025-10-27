@@ -75,12 +75,12 @@ export function CalendarView({ calendar, orderId }: CalendarViewProps) {
         </header>
 
         {/* Calendar */}
-        <div className="container mx-auto px-0 md:px-4 pb-8">
+        <div className="container mx-auto px-0 md:px-4 pb-4">
           <AdventCalendar calendarId={calendar.id} unlockAll={unlockAll} />
         </div>
 
         {/* Footer */}
-        <div className="relative z-10 text-center py-8 px-4">
+        <div className="relative z-10 text-center py-4 px-4">
           <div className="flex items-center justify-center gap-2">
             <p className="text-sm text-muted-foreground">Created by</p>
             <Image

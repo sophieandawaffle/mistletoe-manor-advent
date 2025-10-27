@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
 import { Users } from "lucide-react"
 import Image from "next/image"
 
@@ -15,6 +15,7 @@ export function CharactersButton() {
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogTitle className="sr-only">Character Guide</DialogTitle>
         <div className="flex justify-center items-center">
           <Image
             src="/images/characters-guide.svg"
