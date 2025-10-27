@@ -46,7 +46,8 @@ export async function POST(request: Request) {
 
     const supabase = createAdminClient()
 
-    const { error } = await supabase.from("calendars").insert({
+    // Use upsert to handle existing calendars
+    const { error } = await supabase.from("calendars").upsert({
       id: calendarId,
       order_id: orderId,
       password_hash: passwordHash,
