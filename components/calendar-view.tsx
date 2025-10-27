@@ -18,10 +18,10 @@ export function CalendarView({ calendar, orderId }: CalendarViewProps) {
   const [showUnlockConfirmation, setShowUnlockConfirmation] = useState(false)
 
   useEffect(() => {
-    const stored = localStorage.getItem(`unlockAll-${calendar.id}`)
-    if (stored === "true") {
-      setUnlockAll(true)
-    }
+    // Clear any existing unlockAll state when user first logs in
+    // This ensures all doors are locked by default on first login
+    localStorage.removeItem(`unlockAll-${calendar.id}`)
+    setUnlockAll(false)
   }, [calendar.id])
 
   const handleUnlockAll = () => {

@@ -78,20 +78,20 @@ export function PasswordGate({ calendar }: PasswordGateProps) {
         <div className="w-full max-w-md bg-background/95 backdrop-blur-sm border border-border rounded-lg p-8 shadow-xl">
           <h2 className="text-2xl font-bold text-center mb-2">Enter Your Details</h2>
           <p className="text-muted-foreground text-center mb-6">
-            Please enter your order ID and password to access your calendar
+            Please enter your Etsy Order Confirmation Number and password to access your calendar
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="orderId" className="block text-sm font-medium mb-2">
-                Order ID
+                Etsy Order Confirmation Number
               </label>
               <Input
                 id="orderId"
                 type="text"
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                placeholder="Enter your order ID"
+                placeholder="Enter your Etsy Order Confirmation Number"
                 required
                 disabled={isLoading}
               />
