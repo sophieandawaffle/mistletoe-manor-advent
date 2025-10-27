@@ -2,7 +2,7 @@
 
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { CharactersButton } from "@/components/characters-button"
 import { LogoutButton } from "@/components/logout-button"
 import { useState } from "react"
@@ -36,6 +36,7 @@ export function MobileMenu({ calendarId, unlockAll, onUnlockAll, onLockDoors }: 
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-64">
+        <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
         <div className="flex flex-col items-center gap-4 mt-8">
           <CharactersButton />
           {!unlockAll && (
