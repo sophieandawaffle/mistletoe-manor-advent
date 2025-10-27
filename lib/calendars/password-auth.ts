@@ -11,7 +11,7 @@ export async function verifyCalendarPassword(calendarId: string, orderId: string
   const { data, error } = await supabase
     .from("calendars")
     .select("*")
-    .eq("id", calendarId)
+    .eq("calendar_id", calendarId)
     .eq("order_id", orderId)
     .eq("password_hash", passwordHash)
     .single()
@@ -26,11 +26,11 @@ export async function verifyCalendarPassword(calendarId: string, orderId: string
 export async function getCalendarByOrderId(orderId: string): Promise<string | null> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase.from("calendars").select("id").eq("order_id", orderId).single()
+  const { data, error } = await supabase.from("calendars").select("calendar_id").eq("order_id", orderId).single()
 
   if (error || !data) {
     return null
   }
 
-  return data.id
+  return data.calendar_id
 }

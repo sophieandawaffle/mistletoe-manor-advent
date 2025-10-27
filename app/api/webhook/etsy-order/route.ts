@@ -46,10 +46,10 @@ export async function POST(request: Request) {
 
     const supabase = createAdminClient()
 
-    // Use upsert to handle existing calendars
-    const { error } = await supabase.from("calendars").upsert({
-      id: calendarId,
+    // Insert new order - each order gets its own unique record
+    const { error } = await supabase.from("calendars").insert({
       order_id: orderId,
+      calendar_id: calendarId,
       password_hash: passwordHash,
     })
 
