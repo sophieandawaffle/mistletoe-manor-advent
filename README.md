@@ -89,7 +89,7 @@ Replace `YOUR_WEBHOOK_SECRET_HERE` with the same value you set in your `WEBHOOK_
 
 ### 4. Testing
 
-For testing purposes, you can bypass authentication using the "Bypass login" link on the password gate. This sets a test cookie without requiring database credentials.
+Authentication is required to access the calendar. Users must enter their order ID and password to gain access.
 
 ### Security Notes
 

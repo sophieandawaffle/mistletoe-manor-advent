@@ -51,29 +51,6 @@ export function PasswordGate({ calendar }: PasswordGateProps) {
     }
   }
 
-  const handleBypassLogin = async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch(`/api/calendar/${calendar.id}/bypass`, {
-        method: "POST",
-      })
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({ error: "Bypass failed" }))
-        setError(data.error || "Bypass failed")
-        setIsLoading(false)
-        return
-      }
-
-      const data = await response.json().catch(() => ({ success: true }))
-
-      window.location.reload()
-    } catch (err) {
-      console.error("[v0] Bypass error:", err)
-      setError("An error occurred. Please try again.")
-      setIsLoading(false)
-    }
-  }
 
   return (
     <main
@@ -142,16 +119,6 @@ export function PasswordGate({ calendar }: PasswordGateProps) {
             </Button>
           </form>
 
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={handleBypassLogin}
-              className="text-sm text-muted-foreground hover:text-foreground underline"
-              disabled={isLoading}
-            >
-              Bypass login (for testing)
-            </button>
-          </div>
         </div>
 
         {/* Footer */}
