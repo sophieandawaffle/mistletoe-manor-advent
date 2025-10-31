@@ -17,10 +17,30 @@ export function PasswordGate({ calendar }: PasswordGateProps) {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
+  const validateOrderId = (orderId: string): string | null => {
+    // Must be only numbers
+    if (!/^\d+$/.test(orderId)) {
+      return "Order confirmation number must contain only numbers"
+    }
+    // Must be between 8 and 12 characters
+    if (orderId.length < 8 || orderId.length > 12) {
+      return "Order confirmation number must be between 8 and 12 digits"
+    }
+    return null
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setIsLoading(true)
+
+    // Validate order ID format
+    const validationError = validateOrderId(orderId)
+    if (validationError) {
+      setError(validationError)
+      setIsLoading(false)
+      return
+    }
 
     try {
       const response = await fetch(`/api/calendar/${calendar.id}/auth`, {
@@ -89,11 +109,21 @@ export function PasswordGate({ calendar }: PasswordGateProps) {
                 id="orderId"
                 type="text"
                 value={orderId}
-                onChange={(e) => setOrderId(e.target.value)}
-                placeholder="Enter your Etsy Order Confirmation Number"
+                onChange={(e) => {
+                  // Only allow numbers
+                  const value = e.target.value.replace(/\D/g, "")
+                  setOrderId(value)
+                }}
+                placeholder="Enter your Etsy Order Confirmation Number (8-12 digits)"
                 required
                 disabled={isLoading}
+                minLength={8}
+                maxLength={12}
+                pattern="[0-9]{8,12}"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Must be 8-12 digits (numbers only)
+              </p>
             </div>
 
             {error && <div className="text-sm text-red-500 text-center">{error}</div>}

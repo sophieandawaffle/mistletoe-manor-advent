@@ -19,6 +19,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ cal
       })
     }
 
+    // Validate order ID format: only numbers, 8-12 characters
+    if (!/^\d+$/.test(orderId)) {
+      return NextResponse.json({ error: "Order confirmation number must contain only numbers" }, { 
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+    }
+
+    if (orderId.length < 8 || orderId.length > 12) {
+      return NextResponse.json({ error: "Order confirmation number must be between 8 and 12 digits" }, { 
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+    }
+
     // Check if order exists in database (with or without password - both are valid)
     console.log("[v0] Checking if order exists...")
     const exists = await orderExists(calendarId, orderId)
