@@ -16,13 +16,57 @@ interface CalendarViewProps {
 export function CalendarView({ calendar, orderId }: CalendarViewProps) {
   const [unlockAll, setUnlockAll] = useState(false)
   const [showUnlockConfirmation, setShowUnlockConfirmation] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
+  // Load unlock_all state from Supabase on mount
   useEffect(() => {
-    // Clear any existing unlockAll state when user first logs in
-    // This ensures all doors are locked by default on first login
-    localStorage.removeItem(`unlockAll-${calendar.id}`)
-    setUnlockAll(false)
-  }, [calendar.id])
+    const loadProgress = async () => {
+      try {
+        const response = await fetch(`/api/calendar/${calendar.id}/progress?orderId=${encodeURIComponent(orderId)}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (typeof data.unlockAll === "boolean") {
+            setUnlockAll(data.unlockAll)
+          }
+        }
+      } catch (error) {
+        console.error("[v0] Error loading unlock state:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadProgress()
+  }, [calendar.id, orderId])
+
+  // Save unlock_all state to Supabase when it changes
+  useEffect(() => {
+    if (isLoading) return
+
+    const saveUnlockState = async () => {
+      try {
+        // Also fetch current openedDays to include in the save
+        const getResponse = await fetch(`/api/calendar/${calendar.id}/progress?orderId=${encodeURIComponent(orderId)}`)
+        const getData = await getResponse.ok ? await getResponse.json() : { openedDays: [] }
+
+        await fetch(`/api/calendar/${calendar.id}/progress`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderId,
+            openedDays: getData.openedDays || [],
+            unlockAll,
+          }),
+        })
+      } catch (error) {
+        console.error("[v0] Error saving unlock state:", error)
+      }
+    }
+
+    saveUnlockState()
+  }, [unlockAll, calendar.id, orderId, isLoading])
 
   const handleUnlockAll = () => {
     setShowUnlockConfirmation(true)
@@ -31,14 +75,12 @@ export function CalendarView({ calendar, orderId }: CalendarViewProps) {
   const confirmUnlockAll = () => {
     console.log("[v0] Unlocking all doors")
     setUnlockAll(true)
-    localStorage.setItem(`unlockAll-${calendar.id}`, "true")
     setShowUnlockConfirmation(false)
   }
 
   const handleLockDoors = () => {
     console.log("[v0] Locking doors")
     setUnlockAll(false)
-    localStorage.removeItem(`unlockAll-${calendar.id}`)
   }
 
   return (
@@ -76,7 +118,7 @@ export function CalendarView({ calendar, orderId }: CalendarViewProps) {
 
         {/* Calendar */}
         <div className="container mx-auto px-0 md:px-4 pb-4">
-          <AdventCalendar calendarId={calendar.id} unlockAll={unlockAll} />
+          <AdventCalendar calendarId={calendar.id} unlockAll={unlockAll} orderId={orderId} />
         </div>
 
         {/* Footer */}

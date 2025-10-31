@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AdventDoor } from "./advent-door"
 import { DayModal } from "./day-modal"
 import { CountdownModal } from "./countdown-modal"
@@ -11,6 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 interface AdventCalendarProps {
   calendarId: string
   unlockAll: boolean // Now using this prop instead of local state
+  orderId: string // Add orderId to identify the user
 }
 
 const doorPositions = [
@@ -51,11 +52,61 @@ const doorPositions = [
   { top: "68%", left: "91%", rotate: "-3deg", scale: 1.4, mobileTop: "80%", mobileLeft: "85%", mobileScale: 0.4 },
 ]
 
-export function AdventCalendar({ calendarId, unlockAll }: AdventCalendarProps) {
+export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalendarProps) {
   const [openedDays, setOpenedDays] = useState<Set<number>>(new Set())
   const [selectedDay, setSelectedDay] = useState<DayContent | null>(null)
   const [countdownDay, setCountdownDay] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const isMobile = useIsMobile()
+
+  // Load progress from Supabase on mount
+  useEffect(() => {
+    const loadProgress = async () => {
+      try {
+        const response = await fetch(`/api/calendar/${calendarId}/progress?orderId=${encodeURIComponent(orderId)}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.openedDays && Array.isArray(data.openedDays)) {
+            setOpenedDays(new Set(data.openedDays))
+          }
+        }
+      } catch (error) {
+        console.error("[v0] Error loading progress:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadProgress()
+  }, [calendarId, orderId])
+
+  // Save progress to Supabase when openedDays changes
+  useEffect(() => {
+    if (isLoading) return
+
+    const saveProgress = async () => {
+      try {
+        const openedDaysArray = Array.from(openedDays).sort((a, b) => a - b)
+        await fetch(`/api/calendar/${calendarId}/progress`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderId,
+            openedDays: openedDaysArray,
+            unlockAll: unlockAll, // Include unlockAll state in saves
+          }),
+        })
+      } catch (error) {
+        console.error("[v0] Error saving progress:", error)
+      }
+    }
+
+    // Debounce saves to avoid too many requests
+    const timeoutId = setTimeout(saveProgress, 500)
+    return () => clearTimeout(timeoutId)
+  }, [openedDays, unlockAll, calendarId, orderId, isLoading])
 
   const handleDoorClick = (day: number) => {
     const isUnlocked = isDayUnlocked(day, unlockAll)
