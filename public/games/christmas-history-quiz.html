@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christmas History Quiz</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .quiz-card {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .quiz-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #dc2626, #22c55e, #dc2626);
+        }
+
+        .quiz-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .christmas-emoji {
+            font-size: 3rem;
+            margin: 1rem 0;
+            display: block;
+        }
+
+        .welcome-text {
+            font-size: 1.125rem;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .question-container {
+            display: none;
+            text-align: left;
+        }
+
+        .question-container.visible {
+            display: block;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1.5rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .score {
+            color: #dc2626;
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        .question-text {
+            font-size: 1.375rem;
+            color: #f8fafc;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: grid;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+
+        .option {
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.125rem;
+            color: #f8fafc;
+            text-align: left;
+        }
+
+        .option:hover {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: rgba(148, 163, 184, 0.5);
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+            color: #93c5fd;
+        }
+
+        .option.correct {
+            background: rgba(34, 197, 94, 0.3);
+            border-color: #22c55e;
+            color: #4ade80;
+        }
+
+        .option.incorrect {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+            color: #f87171;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            border-radius: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .next-btn.enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .next-btn:hover.enabled {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+        }
+
+        .results-container {
+            display: none;
+            text-align: center;
+        }
+
+        .results-container.visible {
+            display: block;
+        }
+
+        .final-score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #dc2626;
+            margin: 1rem 0;
+        }
+
+        .score-message {
+            font-size: 1.25rem;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .restart-btn:hover {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #dc2626, #22c55e);
+            border-radius: 0.5rem;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .welcome-screen {
+            display: block;
+        }
+
+        .welcome-screen.hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-card {
+                padding: 1rem;
+                box-sizing: border-box;
+            }
+
+            .quiz-title {
+                font-size: 2rem;
+            }
+
+            .question-text {
+                font-size: 1.125rem;
+            }
+
+            .question-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .options {
+                gap: 0.75rem;
+                width: 100%;
+                margin-bottom: 1.5rem;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            .option {
+                padding: 0.875rem 1rem;
+                font-size: 1rem;
+                width: 100%;
+                max-width: 100%;
+                text-align: left;
+                box-sizing: border-box;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+            }
+
+            .next-btn {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            .question-container {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow-x: hidden;
+            }
+
+            .puzzle-container {
+                overflow-x: hidden;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 23</div>
+    <h1 class="puzzle-title" id="quiz-title">🎄 Christmas History Quiz 🎄</h1>
+    <p class="mystery-subtitle">Test your knowledge of Christmas traditions and history!</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <div class="quiz-card">
+     <!-- Welcome Screen -->
+     <div id="welcome-screen" class="welcome-screen">
+      <span class="christmas-emoji">🎅🤶🎁</span>
+      <p class="welcome-text" id="welcome-message">Test your knowledge of Christmas traditions, history, and fascinating facts! From ancient origins to modern celebrations, discover how much you really know about the most wonderful time of the year.</p>
+      <button class="start-btn" id="start-btn">Start Quiz</button>
+     </div>
+
+     <!-- Question Screen -->
+     <div id="question-screen" class="question-container">
+      <div class="progress-bar">
+       <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="question-header">
+       <span class="question-number" id="question-number">Question 1 of 12</span>
+       <span class="score" id="current-score">Score: 0/12</span>
+      </div>
+      <h2 class="question-text" id="question-text"></h2>
+      <div class="options" id="options-container"></div>
+      <button class="next-btn" id="next-btn">Next Question</button>
+     </div>
+
+     <!-- Results Screen -->
+     <div id="results-screen" class="results-container">
+      <span class="christmas-emoji">🏆</span>
+      <h2 class="quiz-title">Quiz Complete!</h2>
+      <div class="final-score" id="final-score">0/12</div>
+      <p class="score-message" id="score-message"></p>
+      <button class="restart-btn" id="restart-btn">Take Quiz Again</button>
+     </div>
+    </div>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        const questions = [
+            {
+                question: "What was the first ever Christmas tree actually made of?",
+                options: ["Pine needles", "Dyed goose feathers", "Paper leaves", "Silk fabric"],
+                correct: 1
+            },
+            {
+                question: "Where does the term 'Xmas' originate from?",
+                options: ["America as shorthand", "Greece - X is the Greek symbol for Christ", "Rome", "England"],
+                correct: 1
+            },
+            {
+                question: "Which city was home to the first decorated Christmas tree in 1510?",
+                options: ["Berlin, Germany", "London, England", "Riga, Latvia", "Paris, France"],
+                correct: 2
+            },
+            {
+                question: "Who created Rudolph the Red Nosed Reindeer?",
+                options: ["Walt Disney", "Montgomery Ward store", "Coca-Cola", "Charles Dickens"],
+                correct: 1
+            },
+            {
+                question: "Who first used electric lights on a Christmas tree in 1882?",
+                options: ["Thomas Edison", "Edward H Johnson", "Benjamin Franklin", "Nikola Tesla"],
+                correct: 1
+            },
+            {
+                question: "Where did the tradition of putting tangerines in stockings originate?",
+                options: ["English orphanages", "German markets", "12th century French nuns", "Italian monasteries"],
+                correct: 2
+            },
+            {
+                question: "How tall was the world's tallest Christmas tree displayed in 1950?",
+                options: ["185ft", "200ft", "221ft", "250ft"],
+                correct: 2
+            },
+            {
+                question: "What is the bestselling Christmas song of all time?",
+                options: ["Silent Night", "White Christmas by Bing Crosby", "Jingle Bells", "Last Christmas"],
+                correct: 1
+            },
+            {
+                question: "What were the earliest known Christmas decorations?",
+                options: ["Candles", "Ribbons", "Apples (representing Adam and Eve)", "Holly leaves"],
+                correct: 2
+            },
+            {
+                question: "What was traditionally served as the main Christmas meal before turkey became popular?",
+                options: ["Roast beef", "Pig head served with mustard", "Goose", "Lamb"],
+                correct: 1
+            },
+            {
+                question: "Who produced and sent the first Christmas card in 1843?",
+                options: ["Queen Victoria", "Sir Henry Cole", "Charles Dickens", "Prince Albert"],
+                correct: 1
+            },
+            {
+                question: "Why should Rudolph technically be portrayed without antlers?",
+                options: ["Female reindeer don't have antlers", "Male reindeer shed antlers in winter", "Antlers are too heavy for flying", "It's just artistic choice"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        function startQuiz() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('question-screen').classList.add('visible');
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('question-number').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('current-score').textContent = `Score: ${score}/${questions.length}`;
+            document.getElementById('question-text').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            document.getElementById('next-btn').classList.remove('enabled');
+            selectedAnswer = null;
+        }
+
+        function selectAnswer(answerIndex) {
+            if (selectedAnswer !== null) return;
+            
+            selectedAnswer = answerIndex;
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((option, index) => {
+                option.classList.add('disabled');
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === answerIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                } else if (index === answerIndex) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            if (answerIndex === question.correct) {
+                score++;
+                document.getElementById('current-score').textContent = `Score: ${score}/${questions.length}`;
+                createSuccessAnimation();
+            }
+            
+            document.getElementById('next-btn').classList.add('enabled');
+        }
+
+        function nextQuestion() {
+            if (selectedAnswer === null) return;
+            
+            currentQuestion++;
+            
+            if (currentQuestion >= questions.length) {
+                showResults();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('question-screen').classList.remove('visible');
+            document.getElementById('results-screen').classList.add('visible');
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('final-score').textContent = `${score}/${questions.length}`;
+            
+            let message = '';
+            if (percentage >= 90) {
+                message = "🎉 Outstanding! You're a Christmas history expert!";
+            } else if (percentage >= 70) {
+                message = "🎄 Great job! You know your Christmas traditions well!";
+            } else if (percentage >= 50) {
+                message = "🎁 Not bad! You have a good grasp of Christmas history.";
+            } else {
+                message = "🎅 Keep learning! Christmas history is full of surprises.";
+            }
+            
+            document.getElementById('score-message').textContent = message;
+            createSuccessAnimation();
+        }
+
+        function restartQuiz() {
+            document.getElementById('results-screen').classList.remove('visible');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('start-btn').addEventListener('click', startQuiz);
+            document.getElementById('next-btn').addEventListener('click', nextQuestion);
+            document.getElementById('restart-btn').addEventListener('click', restartQuiz);
+        });
+    </script>
+ </body>
+</html>
+

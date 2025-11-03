@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frozen Words</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .instructions-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+        }
+
+        .instructions-text {
+            font-size: 1.125rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .score-display {
+            color: #22c55e;
+        }
+
+        .clicks-display {
+            color: #ef4444;
+        }
+
+        .word-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            min-height: 100px;
+            align-items: center;
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+        }
+
+        .word-display {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .letter {
+            position: relative;
+            width: 50px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .letter-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(51, 65, 85, 0.8));
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.5rem;
+            z-index: 1;
+        }
+
+        .letter-text {
+            position: relative;
+            z-index: 3;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .frost-patch {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
+            border-radius: 0.25rem;
+            z-index: 2;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .frost-patch::before {
+            content: '❄';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.75rem;
+            opacity: 0.8;
+            color: rgba(173, 216, 230, 0.9);
+        }
+
+        .frost-patch.melted {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        .letter:hover .frost-patch:not(.melted) {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(224, 247, 250, 0.8));
+        }
+
+        .letter.revealed .letter-text {
+            opacity: 1;
+        }
+
+        .guess-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .guess-input {
+            padding: 0.75rem 1.25rem;
+            font-size: 1.125rem;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            width: 250px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s ease;
+            background: rgba(15, 23, 42, 0.8);
+            color: #f8fafc;
+        }
+
+        .guess-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .guess-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.125rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .guess-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .guess-btn:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .feedback-message {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            min-height: 2rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+        }
+
+        .feedback-message.correct {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid #22c55e;
+            color: #4ade80;
+        }
+
+        .feedback-message.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            color: #f87171;
+        }
+
+        .feedback-message.empty {
+            display: none;
+        }
+
+        .next-word-btn {
+            display: none;
+            margin: 1.5rem auto;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .next-word-btn:hover {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+        }
+
+        .next-word-btn.visible {
+            display: block;
+        }
+
+        .game-over {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .game-over.visible {
+            display: block;
+        }
+
+        .final-score-title {
+            font-size: 2rem;
+            color: #fbbf24;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .final-score-value {
+            font-size: 1.5rem;
+            color: #cbd5e1;
+            margin-bottom: 1.5rem;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .restart-btn:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .letter {
+                width: 40px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .guess-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .guess-input {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .guess-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .game-stats {
+                flex-direction: column;
+                gap: 0.75rem;
+                text-align: center;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 19</div>
+    <h1 class="puzzle-title" id="gameTitle">Frozen Words</h1>
+    <p class="mystery-subtitle">Click letters to defrost them and guess the hidden word!</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <div class="instructions-section">
+     <p class="instructions-text" id="instructionText">Click letters to defrost them and guess the hidden word before time runs out!</p>
+    </div>
+
+    <div class="game-stats">
+     <div class="score-display">
+      Score: <span id="score">0</span>
+     </div>
+     <div class="clicks-display">
+      Clicks: <span id="clicksRemaining">15</span>
+     </div>
+    </div>
+
+    <div class="word-container">
+     <div class="word-display" id="wordDisplay"></div>
+    </div>
+
+    <div class="guess-section">
+     <input type="text" class="solution-input guess-input" id="guessInput" placeholder="Your guess..." autocomplete="off">
+     <button class="submit-button guess-btn" id="guessButton">Guess Word</button>
+    </div>
+
+    <div class="feedback-message empty" id="feedback"></div>
+    
+    <button class="next-word-btn" id="nextWordButton">Next Word</button>
+
+    <div class="game-over" id="gameOver">
+     <div class="final-score-title">Game Over!</div>
+     <div class="final-score-value">
+      Final Score: <span id="finalScore">0</span>
+     </div>
+     <button class="restart-btn" id="restartButton">Play Again</button>
+    </div>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        let gameState = {
+            words: ['WINTER', 'FROZEN', 'SNOWMAN', 'BLIZZARD', 'ICICLE'],
+            currentWordIndex: 0,
+            currentWord: '',
+            revealedLetters: new Set(),
+            score: 0,
+            clicksRemaining: 15,
+            gameActive: true
+        };
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function initializeGame() {
+            gameState.currentWordIndex = 0;
+            gameState.score = 0;
+            gameState.clicksRemaining = 15;
+            gameState.gameActive = true;
+            gameState.words = shuffleArray(['WINTER', 'FROZEN', 'SNOWMAN', 'BLIZZARD', 'ICICLE', 'CRYSTAL', 'GLACIER', 'ARCTIC', 'FROSTY', 'FROST', 'CHILL']);
+            
+            updateDisplay();
+            loadNextWord();
+            
+            document.getElementById('gameOver').classList.remove('visible');
+        }
+
+        function loadNextWord() {
+            if (gameState.currentWordIndex >= gameState.words.length) {
+                endGame();
+                return;
+            }
+
+            gameState.currentWord = gameState.words[gameState.currentWordIndex];
+            gameState.revealedLetters.clear();
+            gameState.clicksRemaining = 15; // Reset clicks for new word
+            
+            displayWord();
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback-message empty';
+            document.getElementById('guessInput').value = '';
+            document.getElementById('nextWordButton').classList.remove('visible');
+            document.getElementById('guessButton').disabled = false;
+            updateDisplay();
+        }
+
+        function displayWord() {
+            const wordDisplay = document.getElementById('wordDisplay');
+            wordDisplay.innerHTML = '';
+
+            for (let i = 0; i < gameState.currentWord.length; i++) {
+                const letterDiv = document.createElement('div');
+                letterDiv.className = 'letter';
+                letterDiv.dataset.index = i;
+                letterDiv.dataset.clickCount = '0';
+
+                const letterBg = document.createElement('div');
+                letterBg.className = 'letter-bg';
+
+                const letterText = document.createElement('div');
+                letterText.className = 'letter-text';
+                letterText.textContent = gameState.currentWord[i];
+
+                // Create 5 frost patches in different positions
+                const positions = [
+                    { top: '10%', left: '15%', width: '35%', height: '40%' },
+                    { top: '15%', right: '10%', width: '40%', height: '35%' },
+                    { bottom: '20%', left: '20%', width: '30%', height: '35%' },
+                    { bottom: '15%', right: '15%', width: '35%', height: '30%' },
+                    { top: '40%', left: '35%', width: '30%', height: '25%' }
+                ];
+
+                positions.forEach((pos, index) => {
+                    const patch = document.createElement('div');
+                    patch.className = 'frost-patch';
+                    patch.dataset.patchIndex = index;
+                    
+                    Object.keys(pos).forEach(key => {
+                        patch.style[key] = pos[key];
+                    });
+                    
+                    letterDiv.appendChild(patch);
+                });
+
+                letterDiv.appendChild(letterBg);
+                letterDiv.appendChild(letterText);
+
+                letterDiv.addEventListener('click', () => revealLetter(i));
+
+                wordDisplay.appendChild(letterDiv);
+            }
+        }
+
+        function revealLetter(index) {
+            if (!gameState.gameActive || gameState.clicksRemaining <= 0) return;
+            
+            const letterDiv = document.querySelector(`[data-index="${index}"]`);
+            let clickCount = parseInt(letterDiv.dataset.clickCount);
+            
+            if (clickCount < 5) {
+                gameState.clicksRemaining--;
+                
+                // Melt the next frost patch
+                const patchToMelt = letterDiv.querySelector(`[data-patch-index="${clickCount}"]`);
+                if (patchToMelt) {
+                    patchToMelt.classList.add('melted');
+                }
+                
+                clickCount++;
+                letterDiv.dataset.clickCount = clickCount;
+                
+                // Gradually reveal the letter text
+                const letterText = letterDiv.querySelector('.letter-text');
+                letterText.style.opacity = Math.min(0.2, clickCount / 25);
+                
+                // If fully revealed (5 clicks), make letter fully visible
+                if (clickCount >= 5) {
+                    letterText.style.opacity = 1;
+                    gameState.revealedLetters.add(index);
+                    letterDiv.classList.add('revealed');
+                }
+                
+                updateDisplay();
+                
+                if (gameState.clicksRemaining <= 0) {
+                    revealCorrectWord();
+                }
+            }
+        }
+
+        function revealCorrectWord() {
+            // Reveal all letters
+            for (let i = 0; i < gameState.currentWord.length; i++) {
+                const letterDiv = document.querySelector(`[data-index="${i}"]`);
+                if (letterDiv) {
+                    // Melt all remaining frost patches
+                    const patches = letterDiv.querySelectorAll('.frost-patch:not(.melted)');
+                    patches.forEach(patch => patch.classList.add('melted'));
+                    
+                    letterDiv.classList.add('revealed');
+                    const letterText = letterDiv.querySelector('.letter-text');
+                    if (letterText) {
+                        letterText.style.opacity = 1;
+                    }
+                }
+            }
+            
+            // Show feedback with correct word
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = `Out of clicks! The word was: ${gameState.currentWord}`;
+            feedback.className = 'feedback-message incorrect';
+            
+            document.getElementById('guessButton').disabled = true;
+            
+            // Allow user to proceed to next word or end game
+            if (gameState.currentWordIndex < gameState.words.length - 1) {
+                document.getElementById('nextWordButton').classList.add('visible');
+            } else {
+                // This was the last word, end the game
+                setTimeout(() => {
+                    endGame();
+                }, 2000);
+            }
+        }
+
+        function makeGuess() {
+            if (!gameState.gameActive) return;
+
+            const guess = document.getElementById('guessInput').value.toUpperCase().trim();
+            const feedback = document.getElementById('feedback');
+
+            if (!guess) {
+                feedback.textContent = 'Please enter a guess!';
+                feedback.className = 'feedback-message incorrect';
+                return;
+            }
+
+            if (guess === gameState.currentWord) {
+                const bonusPoints = Math.max(0, gameState.currentWord.length - gameState.revealedLetters.size) * 10;
+                const clickBonus = gameState.clicksRemaining * 2;
+                const totalPoints = 50 + bonusPoints + clickBonus;
+                
+                gameState.score += totalPoints;
+                feedback.textContent = `Correct! +${totalPoints} points`;
+                feedback.className = 'feedback-message correct';
+                
+                document.getElementById('guessButton').disabled = true;
+                document.getElementById('nextWordButton').classList.add('visible');
+                
+                // Reveal all letters
+                for (let i = 0; i < gameState.currentWord.length; i++) {
+                    gameState.revealedLetters.add(i);
+                    const letterDiv = document.querySelector(`[data-index="${i}"]`);
+                    letterDiv.classList.add('revealed');
+                    const letterText = letterDiv.querySelector('.letter-text');
+                    letterText.style.opacity = 1;
+                }
+
+                createSuccessAnimation();
+            } else {
+                feedback.textContent = 'Incorrect! Try again.';
+                feedback.className = 'feedback-message incorrect';
+                gameState.clicksRemaining = Math.max(0, gameState.clicksRemaining - 2);
+                if (gameState.clicksRemaining <= 0) {
+                    revealCorrectWord();
+                }
+            }
+
+            updateDisplay();
+        }
+
+        function nextWord() {
+            gameState.currentWordIndex++;
+            loadNextWord();
+        }
+
+        function endGame() {
+            gameState.gameActive = false;
+            
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('gameOver').classList.add('visible');
+            document.getElementById('guessButton').disabled = true;
+            createSuccessAnimation();
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('clicksRemaining').textContent = gameState.clicksRemaining;
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('guessButton').addEventListener('click', makeGuess);
+            document.getElementById('nextWordButton').addEventListener('click', nextWord);
+            document.getElementById('restartButton').addEventListener('click', initializeGame);
+            
+            document.getElementById('guessInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    makeGuess();
+                }
+            });
+
+            initializeGame();
+        });
+    </script>
+ </body>
+</html>
+

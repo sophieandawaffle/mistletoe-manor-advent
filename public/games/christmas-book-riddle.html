@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christmas Book Riddle Game</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .start-screen {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .welcome-text {
+            font-size: 1.125rem;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.25rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.active {
+            display: block;
+        }
+
+        .progress-container {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .progress-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fbbf24;
+        }
+
+        .riddle-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .riddle-text {
+            font-size: 1.25rem;
+            line-height: 1.7;
+            color: #e2e8f0;
+            margin-bottom: 2rem;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .answer-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .answer-input {
+            flex: 1;
+            font-size: 1.125rem;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+        }
+
+        .skip-btn {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .skip-btn:hover {
+            background: linear-gradient(135deg, #475569 0%, #334155 100%);
+            transform: translateY(-2px);
+        }
+
+        .feedback-message {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .feedback-message.correct {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid #22c55e;
+            color: #4ade80;
+        }
+
+        .feedback-message.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            color: #f87171;
+        }
+
+        .feedback-message.hidden {
+            display: none;
+        }
+
+        .final-screen {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .final-screen.active {
+            display: block;
+        }
+
+        .final-title {
+            font-size: 2.5rem;
+            color: #fbbf24;
+            margin: 1.5rem 0;
+            font-weight: 700;
+        }
+
+        .final-score {
+            font-size: 2rem;
+            color: #fbbf24;
+            margin: 1.5rem 0;
+            font-weight: 700;
+        }
+
+        .final-message {
+            font-size: 1.25rem;
+            color: #cbd5e1;
+            margin: 1.5rem 0 2rem;
+            line-height: 1.6;
+        }
+
+        .play-again-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .play-again-btn:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .riddle-text {
+                font-size: 1.125rem;
+            }
+
+            .answer-row {
+                flex-direction: column;
+            }
+
+            .submit-btn,
+            .skip-btn {
+                width: 100%;
+            }
+
+            .final-title {
+                font-size: 2rem;
+            }
+
+            .final-score {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 16</div>
+    <h1 class="puzzle-title" id="gameTitle">🎄 Christmas Book Riddle Game 📚</h1>
+    <p class="mystery-subtitle">Test your knowledge of Christmas-themed books!</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+     <p class="welcome-text" id="welcomeMessage">Test your knowledge of Christmas-themed books! Can you guess the titles from these festive riddles and clues?</p>
+     <button class="start-btn" id="startBtn">🎁 Start Playing 🎁</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="game-screen" id="gameScreen">
+     <div class="progress-container">
+      <div class="progress-text" id="scoreDisplay">Question 1 of 10 | Score: 0/0</div>
+     </div>
+
+     <div class="riddle-card">
+      <div class="riddle-text" id="riddleText"></div>
+      <div class="answer-row">
+       <input type="text" id="answerInput" class="solution-input" placeholder="Enter your guess..." autocomplete="off">
+       <button class="submit-button submit-btn" id="submitBtn">Submit Answer</button>
+      </div>
+      <button class="skip-btn" id="skipBtn">Skip Question</button>
+      <div class="feedback-message hidden" id="feedback"></div>
+     </div>
+    </div>
+
+    <!-- Final Screen -->
+    <div class="final-screen" id="finalScreen">
+     <h2 class="final-title">🎉 Game Complete! 🎉</h2>
+     <div class="final-score" id="finalScore"></div>
+     <p class="final-message" id="finalMessage"></p>
+     <button class="play-again-btn" id="playAgainBtn">Play Again</button>
+    </div>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        const riddles = [
+            {
+                riddle: "Bah! Humbug! cries the protagonist until spectral visitors from past, present, and future transform his heart. Which Victorian masterpiece chronicles this supernatural redemption?",
+                answer: "a christmas carol",
+                displayAnswer: "A Christmas Carol",
+                author: "Charles Dickens"
+            },
+            {
+                riddle: "Mount Crumpit's cave-dwelling resident despises the Whos' festive noise until his cardiac organ expands threefold. What rhyming tale is this?",
+                answer: "how the grinch stole christmas",
+                displayAnswer: "How the Grinch Stole Christmas!",
+                author: "Dr. Seuss"
+            },
+            {
+                riddle: "Clara's godfather Drosselmeyer gifts her a wooden soldier that battles the Mouse King in a realm of sweets. Name this ballet-inspiring story.",
+                answer: "the nutcracker",
+                displayAnswer: "The Nutcracker",
+                author: "E.T.A. Hoffmann"
+            },
+            {
+                riddle: "Kris Kringle's authenticity is questioned in court while working at Macy's, but faith prevails on this famous Manhattan thoroughfare. What's the title?",
+                answer: "miracle on 34th street",
+                displayAnswer: "Miracle on 34th Street",
+                author: "Valentine Davies"
+            },
+            {
+                riddle: "Hot chocolate and silver bells accompany a pajama-clad passenger's journey to meet the jolly gift-giver at Earth's northernmost point. Which magical voyage is this?",
+                answer: "the polar express",
+                displayAnswer: "The Polar Express",
+                author: "Chris Van Allsburg"
+            },
+            {
+                riddle: "A silk hat's enchantment animates a winter sculpture until spring's warmth threatens his existence. What's this melting tale?",
+                answer: "frosty the snowman",
+                displayAnswer: "Frosty the Snowman",
+                author: "Various Adaptations"
+            },
+            {
+                riddle: "Jo, Meg, Beth, and Amy navigate poverty and war while their father serves as a Union chaplain. Which coming-of-age classic opens on Christmas morning?",
+                answer: "little women",
+                displayAnswer: "Little Women",
+                author: "Louisa May Alcott"
+            },
+            {
+                riddle: "Eight reindeer mock a ninth for his glowing facial feature, until Santa realizes this unique trait makes him perfect for guiding the sleigh through stormy weather. Name this beloved Christmas character.",
+                answer: "rudolph the red nosed reindeer",
+                displayAnswer: "Rudolph the Red-Nosed Reindeer",
+                author: "Robert L. May"
+            },
+            {
+                riddle: "Four siblings discover a magical wardrobe that leads to a snowy realm ruled by an evil White Witch, where it's always winter but never Christmas. What's this fantasy classic?",
+                answer: "the lion the witch and the wardrobe",
+                displayAnswer: "The Lion, the Witch and the Wardrobe",
+                author: "C.S. Lewis"
+            },
+            {
+                riddle: "Sulfur sticks illuminate visions of warmth, food, and a deceased grandmother on New Year's Eve. Which tragic Andersen tale contrasts poverty with celestial comfort?",
+                answer: "the little match girl",
+                displayAnswer: "The Little Match Girl",
+                author: "Hans Christian Andersen"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let gameQuestions = [];
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function normalizeAnswer(answer) {
+            return answer.toLowerCase()
+                .replace(/[^\w\s]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function startGame() {
+            gameQuestions = shuffleArray(riddles);
+            currentQuestion = 0;
+            score = 0;
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').classList.add('active');
+            document.getElementById('finalScreen').classList.remove('active');
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = gameQuestions[currentQuestion];
+            document.getElementById('riddleText').textContent = question.riddle;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('feedback').className = 'feedback-message hidden';
+            document.getElementById('scoreDisplay').textContent = `Question ${currentQuestion + 1} of ${gameQuestions.length} | Score: ${score}/${currentQuestion}`;
+            
+            document.getElementById('answerInput').focus();
+        }
+
+        function submitAnswer() {
+            const userAnswer = document.getElementById('answerInput').value;
+            const correctAnswer = gameQuestions[currentQuestion].answer;
+            const feedback = document.getElementById('feedback');
+            
+            if (normalizeAnswer(userAnswer) === normalizeAnswer(correctAnswer)) {
+                score++;
+                feedback.className = 'feedback-message correct';
+                feedback.textContent = `🎉 Correct! "${gameQuestions[currentQuestion].displayAnswer}" by ${gameQuestions[currentQuestion].author}`;
+                createSuccessAnimation();
+            } else {
+                feedback.className = 'feedback-message incorrect';
+                feedback.textContent = `❌ Not quite! The answer was "${gameQuestions[currentQuestion].displayAnswer}" by ${gameQuestions[currentQuestion].author}`;
+            }
+            
+            feedback.classList.remove('hidden');
+            document.getElementById('scoreDisplay').textContent = `Question ${currentQuestion + 1} of ${gameQuestions.length} | Score: ${score}/${currentQuestion + 1}`;
+            
+            // Auto-advance after 2 seconds
+            setTimeout(() => {
+                nextQuestion();
+            }, 2000);
+        }
+
+        function skipQuestion() {
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback-message incorrect';
+            feedback.textContent = `⏭️ Skipped! The answer was "${gameQuestions[currentQuestion].displayAnswer}" by ${gameQuestions[currentQuestion].author}`;
+            feedback.classList.remove('hidden');
+            document.getElementById('scoreDisplay').textContent = `Question ${currentQuestion + 1} of ${gameQuestions.length} | Score: ${score}/${currentQuestion + 1}`;
+            
+            // Auto-advance after 2 seconds
+            setTimeout(() => {
+                nextQuestion();
+            }, 2000);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion >= gameQuestions.length) {
+                showFinalScreen();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function showFinalScreen() {
+            document.getElementById('gameScreen').classList.remove('active');
+            document.getElementById('finalScreen').classList.add('active');
+            
+            const percentage = Math.round((score / gameQuestions.length) * 100);
+            document.getElementById('finalScore').textContent = `${score}/${gameQuestions.length} (${percentage}%)`;
+            
+            let message = '';
+            if (percentage >= 90) {
+                message = "🌟 Outstanding! You're a Christmas book expert! 🌟";
+            } else if (percentage >= 70) {
+                message = "🎄 Great job! You know your holiday literature! 🎄";
+            } else if (percentage >= 50) {
+                message = "📚 Not bad! Time to read more Christmas classics! 📚";
+            } else {
+                message = "🎁 Keep reading those Christmas stories! 🎁";
+            }
+            
+            document.getElementById('finalMessage').textContent = message;
+            createSuccessAnimation();
+        }
+
+        function resetGame() {
+            document.getElementById('finalScreen').classList.remove('active');
+            document.getElementById('startScreen').style.display = 'block';
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('startBtn').addEventListener('click', startGame);
+            document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+            document.getElementById('skipBtn').addEventListener('click', skipQuestion);
+            document.getElementById('playAgainBtn').addEventListener('click', resetGame);
+            
+            document.getElementById('answerInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    submitAnswer();
+                }
+            });
+        });
+    </script>
+ </body>
+</html>
+

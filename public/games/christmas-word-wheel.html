@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christmas Word Wheel</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .instructions-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+        }
+
+        .instructions-text {
+            font-size: 1.125rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 2rem auto;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 50%;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 8px solid #fbbf24;
+            backdrop-filter: blur(10px);
+        }
+
+        .center-letter {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 4px solid #fff;
+            z-index: 10;
+        }
+
+        .outer-letter {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            border: 3px solid #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 5;
+        }
+
+        .outer-letter:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .outer-letter.selected {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            transform: scale(1.1);
+        }
+
+        .input-section {
+            margin: 2rem 0;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .word-input {
+            font-size: 1.25rem;
+            padding: 0.75rem 1.25rem;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            width: 280px;
+            max-width: 100%;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.8);
+            color: #f8fafc;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: border-color 0.3s ease;
+        }
+
+        .word-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .clear-btn {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .clear-btn:hover {
+            background: linear-gradient(135deg, #475569 0%, #334155 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(71, 85, 105, 0.3);
+        }
+
+        .words-found {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .words-found h3 {
+            color: #f8fafc;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .word-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .word-item {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .score {
+            font-size: 1.25rem;
+            color: #fbbf24;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 2px solid #22c55e;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 2px solid #ef4444;
+        }
+
+        .message.empty {
+            display: none;
+        }
+
+        .hints-section {
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .hints-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .hints-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .hints-list {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .hints-list.visible {
+            display: block;
+        }
+
+        .hints-list h4 {
+            color: #93c5fd;
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .hints-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .hint-word {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.875rem;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            text-align: center;
+        }
+
+        .hint-word.found {
+            background: rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+            border-color: #22c55e;
+        }
+
+        @media (max-width: 768px) {
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+
+            .center-letter {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+
+            .outer-letter {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+
+            .word-input {
+                width: 100%;
+                max-width: 280px;
+                font-size: 1.125rem;
+            }
+
+            .input-section {
+                flex-direction: column;
+            }
+
+            .word-list {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 20</div>
+    <h1 class="puzzle-title" id="gameTitle">Christmas Word Wheel</h1>
+    <p class="mystery-subtitle">Make words using the letters around the wheel. Each letter can only be used once per word, and you must always include the center letter!</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <div class="instructions-section">
+     <p class="instructions-text" id="instructionsText">Make words using the letters around the wheel. Each letter can only be used once per word, and you must always include the center letter!</p>
+    </div>
+
+    <div class="wheel-container" id="wheelContainer">
+     <div class="center-letter" id="centerLetter">S</div>
+    </div>
+
+    <div class="input-section">
+     <input type="text" class="solution-input word-input" id="wordInput" placeholder="TYPE YOUR WORD" autocomplete="off">
+     <button class="submit-button" id="submitBtn">Add Word</button>
+     <button class="clear-btn" id="clearBtn">Clear</button>
+    </div>
+
+    <div class="words-found">
+     <div class="score" id="scoreDisplay">Words Found: 0</div>
+     <div class="message empty" id="messageDisplay"></div>
+     <div class="hints-section">
+      <button class="submit-button hints-btn" id="hintsBtn">Show Expected Words</button>
+      <div class="hints-list" id="hintsList">
+       <h4>Expected words for this wheel:</h4>
+       <div class="hints-grid" id="hintsGrid"></div>
+      </div>
+     </div>
+     <div class="word-list" id="wordList"></div>
+    </div>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        // Christmas-themed letter sets
+        const letterSets = [
+            { center: 'S', outer: ['T', 'A', 'R', 'N', 'O', 'W', 'L', 'E'] }, // STAR, SNOW, etc.
+            { center: 'E', outer: ['T', 'R', 'A', 'L', 'F', 'S', 'N', 'I'] }, // TREE, STAR, etc.
+            { center: 'L', outer: ['B', 'E', 'L', 'S', 'N', 'O', 'W', 'Y'] }, // BELL, SNOW, etc.
+            { center: 'N', outer: ['O', 'E', 'L', 'S', 'W', 'I', 'T', 'R'] }  // NOEL, WINTER, etc.
+        ];
+
+        // Valid words for each set
+        const validWords = {
+            'S': ['STAR', 'SNOW', 'SLOW', 'TOWN', 'WORN', 'TORN', 'LOST', 'WEST', 'REST', 'NEST', 'TEST', 'LAST', 'EAST', 'LEAST', 'STEAL', 'TALES', 'STONE', 'NOTES', 'STORE', 'STARE', 'TEARS', 'RATES', 'WASTE', 'SWEAT', 'WATER', 'LATER', 'ALTER', 'ALERT', 'LEARN', 'NEAR', 'WEAR', 'TEAR', 'REAL', 'TALE', 'LATE', 'RATE', 'SEAT', 'NEAT', 'LEAN', 'LANE', 'SANE', 'SALE', 'SEAL', 'STEAL', 'STALE'],
+            'E': ['TREE', 'STAR', 'TEAR', 'RATE', 'LATE', 'TALE', 'REAL', 'LEAN', 'NEAR', 'FEAR', 'LEAR', 'EARL', 'SEAL', 'STEAL', 'LEAST', 'TALES', 'LATER', 'ALTER', 'ALERT', 'STARE', 'TEARS', 'RATES', 'STEAL', 'STALE', 'SLATE', 'TALES', 'TEALS', 'LEAST', 'STEAL', 'TALES', 'LATER', 'ALERT', 'ALTER', 'STARE', 'TEARS', 'RATES', 'TALES', 'STEAL', 'LEAST', 'STALE'],
+            'L': ['BELL', 'WELL', 'YELL', 'SELL', 'SLOW', 'BOWL', 'BLOW', 'BELOW', 'ELBOW', 'LOWLY', 'NEWLY', 'ONLY', 'LONE', 'LOSE', 'SOLE', 'OLES', 'LENS', 'LOWS', 'OWLS', 'SWELL', 'WELLS', 'YELLS', 'SELLS', 'BOWLS', 'BLOWS', 'LOWES', 'OWLES'],
+            'N': ['NOEL', 'LONE', 'TONE', 'NOTE', 'NEST', 'NETS', 'TENS', 'SENT', 'RENT', 'TERN', 'STERN', 'WINTER', 'INTER', 'INERT', 'REINS', 'RINSE', 'SIREN', 'RISEN', 'SNORE', 'STONE', 'NOTES', 'TONES', 'STERN', 'TERNS', 'RENTS', 'NESTS', 'SNORE', 'STONE', 'NOTES', 'TONES']
+        };
+
+        // Game state
+        let currentSet = letterSets[0];
+        let selectedLetters = [];
+        let foundWords = [];
+        let currentWord = '';
+
+        // Initialize game
+        function initGame() {
+            currentSet = letterSets[Math.floor(Math.random() * letterSets.length)];
+            setupWheel();
+            updateDisplay();
+        }
+
+        function setupWheel() {
+            const centerLetter = document.getElementById('centerLetter');
+            const wheelContainer = document.getElementById('wheelContainer');
+            
+            // Clear existing outer letters
+            const existingOuter = wheelContainer.querySelectorAll('.outer-letter');
+            existingOuter.forEach(el => el.remove());
+            
+            // Set center letter
+            centerLetter.textContent = currentSet.center;
+            
+            // Create outer letters
+            const angleStep = 360 / currentSet.outer.length;
+            currentSet.outer.forEach((letter, index) => {
+                const letterEl = document.createElement('div');
+                letterEl.className = 'outer-letter';
+                letterEl.textContent = letter;
+                letterEl.dataset.letter = letter;
+                
+                // Position around the circle
+                const angle = (angleStep * index - 90) * (Math.PI / 180);
+                const radius = 110;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                
+                letterEl.style.left = `calc(50% + ${x}px - 25px)`;
+                letterEl.style.top = `calc(50% + ${y}px - 25px)`;
+                
+                letterEl.addEventListener('click', () => selectLetter(letter, letterEl));
+                wheelContainer.appendChild(letterEl);
+            });
+        }
+
+        function selectLetter(letter, element) {
+            if (selectedLetters.includes(letter)) return;
+            
+            selectedLetters.push(letter);
+            element.classList.add('selected');
+            updateCurrentWord();
+        }
+
+        function updateCurrentWord() {
+            // Always include center letter first, then selected letters
+            currentWord = currentSet.center + selectedLetters.join('');
+            document.getElementById('wordInput').value = currentWord;
+        }
+
+        function clearSelection() {
+            selectedLetters = [];
+            currentWord = '';
+            document.getElementById('wordInput').value = '';
+            
+            // Remove selection styling
+            document.querySelectorAll('.outer-letter').forEach(el => {
+                el.classList.remove('selected');
+            });
+        }
+
+        function submitWord() {
+            const inputValue = document.getElementById('wordInput').value.trim().toUpperCase();
+            const word = inputValue || currentWord.toUpperCase();
+            const messageEl = document.getElementById('messageDisplay');
+            
+            if (word.length < 3) {
+                showMessage('Word must be at least 3 letters long!', 'error');
+                return;
+            }
+            
+            if (foundWords.includes(word)) {
+                showMessage('You already found that word!', 'error');
+                return;
+            }
+            
+            if (!word.includes(currentSet.center)) {
+                showMessage('Word must include the center letter!', 'error');
+                return;
+            }
+            
+            // Check if word uses only available letters
+            const availableLetters = [currentSet.center, ...currentSet.outer];
+            const wordLetters = word.split('');
+            const letterCount = {};
+            
+            // Count available letters
+            availableLetters.forEach(letter => {
+                letterCount[letter] = (letterCount[letter] || 0) + 1;
+            });
+            
+            // Check if word can be made
+            let canMake = true;
+            const usedCount = {};
+            wordLetters.forEach(letter => {
+                usedCount[letter] = (usedCount[letter] || 0) + 1;
+                if (usedCount[letter] > (letterCount[letter] || 0)) {
+                    canMake = false;
+                }
+            });
+            
+            if (!canMake) {
+                showMessage('Invalid letter combination!', 'error');
+                return;
+            }
+            
+            // Check if it's a valid word
+            const validWordsForSet = validWords[currentSet.center] || [];
+            if (validWordsForSet.includes(word)) {
+                foundWords.push(word);
+                showMessage('Great word!', 'success');
+                updateWordList();
+                clearSelection();
+                createSuccessAnimation();
+            } else {
+                showMessage('Not a valid word. Try another!', 'error');
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('messageDisplay');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            
+            setTimeout(() => {
+                messageEl.textContent = '';
+                messageEl.className = 'message empty';
+            }, 3000);
+        }
+
+        function updateWordList() {
+            const wordListEl = document.getElementById('wordList');
+            const scoreEl = document.getElementById('scoreDisplay');
+            const validWordsForSet = validWords[currentSet.center] || [];
+            
+            scoreEl.textContent = `Words Found: ${foundWords.length} / ${validWordsForSet.length}`;
+            
+            wordListEl.innerHTML = '';
+            foundWords.forEach(word => {
+                const wordEl = document.createElement('div');
+                wordEl.className = 'word-item';
+                wordEl.textContent = word;
+                wordListEl.appendChild(wordEl);
+            });
+            
+            // Update hints display if it's visible
+            const hintsList = document.getElementById('hintsList');
+            if (hintsList.classList.contains('visible')) {
+                updateHintsDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            updateWordList();
+        }
+
+        function toggleHints() {
+            const hintsList = document.getElementById('hintsList');
+            const hintsBtn = document.getElementById('hintsBtn');
+            
+            if (!hintsList.classList.contains('visible')) {
+                hintsList.classList.add('visible');
+                hintsBtn.textContent = 'Hide Expected Words';
+                updateHintsDisplay();
+            } else {
+                hintsList.classList.remove('visible');
+                hintsBtn.textContent = 'Show Expected Words';
+            }
+        }
+
+        function updateHintsDisplay() {
+            const hintsGrid = document.getElementById('hintsGrid');
+            const validWordsForSet = validWords[currentSet.center] || [];
+            
+            hintsGrid.innerHTML = '';
+            validWordsForSet.forEach(word => {
+                const hintEl = document.createElement('div');
+                hintEl.className = 'hint-word';
+                hintEl.textContent = word;
+                
+                if (foundWords.includes(word)) {
+                    hintEl.classList.add('found');
+                }
+                
+                hintsGrid.appendChild(hintEl);
+            });
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('submitBtn').addEventListener('click', submitWord);
+            document.getElementById('clearBtn').addEventListener('click', clearSelection);
+            document.getElementById('hintsBtn').addEventListener('click', toggleHints);
+            
+            document.getElementById('wordInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    submitWord();
+                }
+            });
+
+            initGame();
+        });
+    </script>
+ </body>
+</html>
+

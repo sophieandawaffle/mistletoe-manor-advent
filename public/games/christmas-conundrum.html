@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Christmas Conundrum</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .riddle-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .riddle-number {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .riddle-text {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .hint-display {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.75rem;
+            color: #cbd5e1;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .hint-display.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .riddle-card {
+                padding: 1.5rem;
+            }
+
+            .riddle-text {
+                font-size: 1rem;
+                line-height: 1.5;
+                margin-bottom: 1.5rem;
+            }
+
+            .riddle-number {
+                font-size: 0.8rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .hint-display {
+                padding: 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .navigation button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .riddle-card {
+                padding: 1.25rem;
+            }
+
+            .riddle-text {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 5</div>
+    <h1 class="puzzle-title" id="gameTitle">The Christmas Conundrum</h1>
+    <p class="mystery-subtitle">Welcome to the mysterious halls of <span id="manorName">Mistletoe Manor</span></p>
+   </header>
+
+   <main class="puzzle-container">
+    <div class="progress-container">
+     <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+     </div>
+    </div>
+    <div class="riddle-card" id="riddleCard">
+     <div class="riddle-number" id="riddleNumber">Riddle 1 of 5</div>
+     <div class="riddle-text" id="riddleText">Loading riddle...</div>
+     <div class="input-section">
+      <label for="answerInput" class="input-label">Enter your answer:</label>
+      <input type="text" class="solution-input" id="answerInput" placeholder="Type your answer here..." autocomplete="off">
+     </div>
+     <div class="button-group">
+      <button class="submit-button" id="submitBtn">Submit Answer</button>
+      <button class="submit-button secondary" id="hintBtn">💡 Hint</button>
+     </div>
+     <div class="feedback" id="feedback"></div>
+     <div class="hint-display" id="hintDisplay"></div>
+     <div class="navigation" style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center;">
+      <button class="submit-button secondary" id="prevBtn" disabled>Previous</button>
+      <button class="submit-button secondary" id="nextBtn" disabled>Next</button>
+     </div>
+     <div class="completion-message" id="completionMessage" style="display: none; margin-top: 1.5rem;">
+      <div class="puzzle-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎄 Congratulations! 🎄</div>
+      <p class="mystery-subtitle">You've solved all the mysteries of Mistletoe Manor! The Christmas spirit has been restored to these ancient halls.</p>
+     </div>
+    </div>
+   </main>
+  </div>
+  <script>
+        // Default configuration
+        const defaultConfig = {
+            game_title: "The Christmas Conundrum",
+            manor_name: "Mistletoe Manor",
+            welcome_message: "Welcome to the mysterious halls of"
+        };
+
+        // Game state
+        let currentRiddle = 0;
+        let solvedRiddles = new Set();
+        
+        const riddles = [
+            {
+                text: "Above the threshold where hearts align, I dangle green with berries fine. Ancient druids knew my power well, beneath my leaves, what stories tell? Logic says I'm hung up high, where Christmas kisses multiply.",
+                answer: "mistletoe",
+                hint: "Celtic wisdom meets holiday tradition - I'm suspended where love takes flight."
+            },
+            {
+                text: "In manor's heart, I dance with light, consuming wood throughout the night. My hunger grows with what I eat, yet I provide both warmth and heat. What feeds me makes me stronger still, I'm tamed by stone, controlled by will.",
+                answer: "fire",
+                hint: "I devour fuel to give you comfort, contained within the manor's hearth."
+            },
+            {
+                text: "Round my face, twelve numbers stand, I move with neither foot nor hand. My voice rings out both day and night, marking moments, wrong and right. In manor's tower, tall I reign, counting joy and counting pain.",
+                answer: "clock",
+                hint: "I speak in chimes and measure time, my hands move but I stay in place."
+            },
+            {
+                text: "I wear a coat of colored paper, hold within what makes hearts caper. Ribbons bind my secret tight, hidden from both touch and sight. Shake me and I'll sing a song, but patience makes the wait less long.",
+                answer: "gift",
+                hint: "My wrapping hides my true intent, beneath the tree is where I'm sent."
+            },
+            {
+                text: "Through solid walls I freely roam, this manor is my ancient home. No breath I take, no food I need, yet memories are what I feed. The living see me, some with fright, I'm bound to neither day nor night.",
+                answer: "spirit",
+                hint: "Death could not make me depart, I linger where I left my heart."
+            }
+        ];
+
+        // Create snowfall effect
+        function createSnowfall() {
+            // Snowfall is now handled by design system CSS
+            // This function kept for compatibility but does nothing
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const progress = (solvedRiddles.size / riddles.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        // Display current riddle
+        function displayRiddle() {
+            const riddle = riddles[currentRiddle];
+            document.getElementById('riddleNumber').textContent = `Riddle ${currentRiddle + 1} of ${riddles.length}`;
+            document.getElementById('riddleText').textContent = riddle.text;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback';
+            
+            // Reset hint display
+            const hintDisplay = document.getElementById('hintDisplay');
+            hintDisplay.classList.remove('show');
+            hintDisplay.textContent = '';
+            document.getElementById('hintBtn').disabled = false;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentRiddle === 0;
+            document.getElementById('nextBtn').disabled = !solvedRiddles.has(currentRiddle) || currentRiddle === riddles.length - 1;
+            
+            // Check if all riddles are solved
+            if (solvedRiddles.size === riddles.length) {
+                document.getElementById('completionMessage').style.display = 'block';
+                document.getElementById('riddleCard').style.display = 'none';
+            }
+        }
+
+        // Show hint
+        function showHint() {
+            const riddle = riddles[currentRiddle];
+            const hintDisplay = document.getElementById('hintDisplay');
+            hintDisplay.textContent = riddle.hint;
+            hintDisplay.classList.add('show');
+            document.getElementById('hintBtn').disabled = true;
+        }
+
+        // Check answer
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answerInput').value.toLowerCase().trim();
+            const correctAnswer = riddles[currentRiddle].answer.toLowerCase();
+            const feedback = document.getElementById('feedback');
+            
+            if (userAnswer === correctAnswer) {
+                feedback.textContent = '🎄 Correct! Well done, detective! 🎄';
+                feedback.className = 'feedback correct';
+                solvedRiddles.add(currentRiddle);
+                updateProgress();
+                
+                // Enable next button if not last riddle
+                if (currentRiddle < riddles.length - 1) {
+                    document.getElementById('nextBtn').disabled = false;
+                }
+                
+                // Check if all riddles solved
+                if (solvedRiddles.size === riddles.length) {
+                    setTimeout(() => {
+                        document.getElementById('completionMessage').style.display = 'block';
+                        document.getElementById('riddleCard').style.display = 'none';
+                    }, 2000);
+                }
+            } else {
+                feedback.textContent = '🔍 Try again! The answer lies within the manor\'s walls...';
+                feedback.className = 'feedback incorrect';
+            }
+        }
+
+        // Navigation functions
+        function previousRiddle() {
+            if (currentRiddle > 0) {
+                currentRiddle--;
+                displayRiddle();
+            }
+        }
+
+        function nextRiddle() {
+            if (currentRiddle < riddles.length - 1 && solvedRiddles.has(currentRiddle)) {
+                currentRiddle++;
+                displayRiddle();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('submitBtn').addEventListener('click', checkAnswer);
+        document.getElementById('hintBtn').addEventListener('click', showHint);
+        document.getElementById('answerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        document.getElementById('prevBtn').addEventListener('click', previousRiddle);
+        document.getElementById('nextBtn').addEventListener('click', nextRiddle);
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', function() {
+            displayRiddle();
+            updateProgress();
+        });
+    </script>
+ </body>
+</html>
+

@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cipher of Carols</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .score-section {
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 0.25rem;
+        }
+
+        .progress-display {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .streak-display {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #22c55e;
+            text-align: center;
+        }
+
+        .cipher-display {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .cipher-label {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .cipher-text {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .hint-text {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            font-style: italic;
+        }
+
+        .input-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: stretch;
+        }
+
+        .answer-input {
+            flex: 1;
+            font-size: 1.125rem;
+        }
+
+        .submit-btn {
+            min-width: 120px;
+            font-weight: 600;
+        }
+
+        .feedback-area {
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .feedback-message {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .feedback-message.correct {
+            color: #22c55e;
+        }
+
+        .feedback-message.incorrect {
+            color: #ef4444;
+        }
+
+        .feedback-message.skipped {
+            color: #3b82f6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+            border: none;
+        }
+
+        .action-btn.secondary:hover {
+            background: linear-gradient(135deg, #475569 0%, #334155 100%);
+            transform: translateY(-2px);
+        }
+
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(34, 197, 94, 0.6);
+                transform: scale(1.05);
+            }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .game-complete {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .game-complete.hidden {
+            display: none;
+        }
+
+        .final-score-display {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin: 1.5rem 0;
+        }
+
+        .performance-message {
+            font-size: 1.125rem;
+            color: #cbd5e1;
+            margin: 1.5rem 0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .game-stats {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cipher-text {
+                font-size: 1.5rem;
+            }
+
+            .input-row {
+                flex-direction: column;
+            }
+
+            .submit-btn {
+                width: 100%;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 14</div>
+    <h1 class="puzzle-title" id="gameTitle">🎄 Cipher of Carols 🎵</h1>
+    <p class="mystery-subtitle">Decode the Christmas carols! Can you guess the real title?</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <div id="game-content">
+     <!-- Score Display -->
+     <div class="game-stats">
+      <div class="score-section">
+       <div class="score-display" id="scoreDisplay">Score: 0</div>
+       <div class="progress-display" id="progressDisplay">Puzzle 1 of 10</div>
+      </div>
+      <div class="streak-display" id="streakDisplay">🔥 Streak: 0</div>
+     </div>
+
+     <!-- Puzzle Display -->
+     <div class="cipher-display">
+      <div class="cipher-label">🎭 Cipher Carol:</div>
+      <div class="cipher-text" id="cipherText">"Hushed Evening, Sacred Evening"</div>
+      <div class="hint-text" id="hintText">Hint: A peaceful Christmas evening song 🌙</div>
+     </div>
+
+     <!-- Input Area -->
+     <div class="input-section">
+      <label for="answerInput" class="input-label">Enter the real carol title:</label>
+      <div class="input-row">
+       <input type="text" id="answerInput" class="solution-input" placeholder="Type your answer here..." autocomplete="off">
+       <button id="submitBtn" class="submit-button submit-btn">Submit</button>
+      </div>
+     </div>
+
+     <!-- Feedback Area -->
+     <div class="feedback-area" id="feedbackArea">
+      <div class="feedback-message" id="feedbackMessage"></div>
+     </div>
+
+     <!-- Action Buttons -->
+     <div class="action-buttons">
+      <button id="skipBtn" class="action-btn secondary">Skip Puzzle</button>
+      <button id="newGameBtn" class="action-btn secondary">New Game</button>
+     </div>
+    </div>
+
+    <!-- Game Complete Screen -->
+    <div id="gameComplete" class="game-complete hidden">
+     <div style="font-size: 2.5rem; margin-bottom: 1rem;">🎉 Game Complete! 🎉</div>
+     <div class="final-score-display" id="finalScore"></div>
+     <div class="performance-message" id="performanceMessage"></div>
+     <button id="playAgainBtn" class="submit-button" style="margin-top: 1.5rem;">Play Again</button>
+    </div>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        // Carol puzzles data
+        const carolPuzzles = [
+            {
+                cipher: "Hushed Evening, Sacred Evening",
+                answer: "Silent Night",
+                hint: "A peaceful Christmas evening song 🌙",
+                alternatives: ["silent night", "silent night holy night"]
+            },
+            {
+                cipher: "Chilly the Ice Sculpture",
+                answer: "Frosty the Snowman",
+                hint: "A jolly winter character ⛄",
+                alternatives: ["frosty the snowman", "frosty snowman"]
+            },
+            {
+                cipher: "Ralph the Crimson-Snouted Caribou",
+                answer: "Rudolph the Red-Nosed Reindeer",
+                hint: "Santa's bright-snouted helper 🦌",
+                alternatives: ["rudolph", "rudolph the red nosed reindeer", "red nosed reindeer"]
+            },
+            {
+                cipher: "Tinkle Chimes",
+                answer: "Jingle Bells",
+                hint: "A classic sleigh ride song 🔔",
+                alternatives: ["jingle bells", "jingle bell"]
+            },
+            {
+                cipher: "Adorn the Corridors",
+                answer: "Deck the Halls",
+                hint: "Decorating for the holidays 🎄",
+                alternatives: ["deck the halls", "deck the hall"]
+            },
+            {
+                cipher: "We Hope You Have a Joyful Holiday",
+                answer: "We Wish You a Merry Christmas",
+                hint: "A cheerful seasonal greeting 🎊",
+                alternatives: ["we wish you a merry christmas", "merry christmas"]
+            },
+            {
+                cipher: "The Initial Yuletide",
+                answer: "The First Noel",
+                hint: "A song about the nativity 👼",
+                alternatives: ["the first noel", "first noel", "noel"]
+            },
+            {
+                cipher: "O Approach All Ye Devoted",
+                answer: "O Come All Ye Faithful",
+                hint: "A call to worship 🙏",
+                alternatives: ["o come all ye faithful", "come all ye faithful"]
+            },
+            {
+                cipher: "Metallic Chimes",
+                answer: "Silver Bells",
+                hint: "City sidewalks, busy sidewalks 🏙️",
+                alternatives: ["silver bells", "silver bell"]
+            },
+            {
+                cipher: "Allow It to Precipitate",
+                answer: "Let It Snow",
+                hint: "Weather outside is frightful ❄️",
+                alternatives: ["let it snow", "let it snow let it snow"]
+            },
+            {
+                cipher: "Dancin' Around the Evergreen",
+                answer: "Rockin' Around the Christmas Tree",
+                hint: "A festive dance song 🕺",
+                alternatives: ["rockin around the christmas tree", "rocking around the christmas tree"]
+            },
+            {
+                cipher: "Ivory Holiday",
+                answer: "White Christmas",
+                hint: "Dreaming of a snowy holiday ❄️",
+                alternatives: ["white christmas", "white xmas"]
+            },
+            {
+                cipher: "Acorns Toasting on a Flame",
+                answer: "The Christmas Song",
+                hint: "Nat King Cole classic 🔥",
+                alternatives: ["the christmas song", "chestnuts roasting", "christmas song"]
+            },
+            {
+                cipher: "I'm Fantasizing of a Snowy Holiday",
+                answer: "I'm Dreaming of a White Christmas",
+                hint: "Bing Crosby's classic winter wish ☁️",
+                alternatives: ["i'm dreaming of a white christmas", "dreaming of a white christmas", "white christmas"]
+            },
+            {
+                cipher: "Teal Holiday",
+                answer: "Blue Christmas",
+                hint: "Elvis sang about this sad holiday 💙",
+                alternatives: ["blue christmas", "blue xmas"]
+            }
+        ];
+
+        // Game state
+        let shuffledPuzzles = [];
+        let currentPuzzleIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let isGameComplete = false;
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function initializeGame() {
+            shuffledPuzzles = shuffleArray([...carolPuzzles].slice(0, 10)); // Use first 10 puzzles
+            currentPuzzleIndex = 0;
+            score = 0;
+            streak = 0;
+            isGameComplete = false;
+            
+            document.getElementById('gameComplete').classList.add('hidden');
+            document.getElementById('game-content').style.display = 'block';
+            
+            displayCurrentPuzzle();
+            updateScoreDisplay();
+        }
+
+        function displayCurrentPuzzle() {
+            if (currentPuzzleIndex >= shuffledPuzzles.length) {
+                completeGame();
+                return;
+            }
+
+            const puzzle = shuffledPuzzles[currentPuzzleIndex];
+            document.getElementById('cipherText').textContent = `"${puzzle.cipher}"`;
+            document.getElementById('hintText').textContent = puzzle.hint;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedbackMessage').textContent = '';
+            document.getElementById('feedbackMessage').className = 'feedback-message';
+            document.getElementById('progressDisplay').textContent = `Puzzle ${currentPuzzleIndex + 1} of ${shuffledPuzzles.length}`;
+        }
+
+        function submitAnswer() {
+            const userAnswer = document.getElementById('answerInput').value.trim().toLowerCase();
+            const puzzle = shuffledPuzzles[currentPuzzleIndex];
+            const feedbackElement = document.getElementById('feedbackMessage');
+            
+            if (!userAnswer) return;
+
+            const isCorrect = puzzle.alternatives.some(alt => 
+                userAnswer === alt || userAnswer.includes(alt) || alt.includes(userAnswer)
+            );
+
+            if (isCorrect) {
+                score += 10 + (streak * 2);
+                streak++;
+                feedbackElement.textContent = '🎉 Correct! Well done!';
+                feedbackElement.className = 'feedback-message correct pulse-glow';
+                
+                createSuccessAnimation();
+                
+                setTimeout(() => {
+                    currentPuzzleIndex++;
+                    displayCurrentPuzzle();
+                    feedbackElement.className = 'feedback-message';
+                }, 1500);
+            } else {
+                streak = 0;
+                feedbackElement.textContent = '❌ Not quite right. Try again!';
+                feedbackElement.className = 'feedback-message incorrect shake';
+                
+                setTimeout(() => {
+                    feedbackElement.className = 'feedback-message';
+                }, 500);
+            }
+            
+            updateScoreDisplay();
+        }
+
+        function skipPuzzle() {
+            const puzzle = shuffledPuzzles[currentPuzzleIndex];
+            const feedbackElement = document.getElementById('feedbackMessage');
+            
+            streak = 0;
+            feedbackElement.textContent = `The answer was: "${puzzle.answer}"`;
+            feedbackElement.className = 'feedback-message skipped';
+            
+            setTimeout(() => {
+                currentPuzzleIndex++;
+                displayCurrentPuzzle();
+                feedbackElement.className = 'feedback-message';
+            }, 2000);
+            
+            updateScoreDisplay();
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
+            document.getElementById('streakDisplay').textContent = `🔥 Streak: ${streak}`;
+        }
+
+        function completeGame() {
+            isGameComplete = true;
+            document.getElementById('game-content').style.display = 'none';
+            document.getElementById('gameComplete').classList.remove('hidden');
+            
+            const percentage = Math.round((score / (shuffledPuzzles.length * 10)) * 100);
+            document.getElementById('finalScore').textContent = `Final Score: ${score} points`;
+            
+            let performanceMessage = "";
+            if (percentage >= 90) {
+                performanceMessage = "🌟 Carol Master! You're a true Christmas music expert!";
+            } else if (percentage >= 70) {
+                performanceMessage = "🎵 Well done! You know your Christmas carols!";
+            } else if (percentage >= 50) {
+                performanceMessage = "🎄 Good effort! Keep practicing those carols!";
+            } else {
+                performanceMessage = "🎁 Nice try! Time to brush up on those Christmas classics!";
+            }
+            
+            document.getElementById('performanceMessage').textContent = performanceMessage;
+            createSuccessAnimation();
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+            document.getElementById('answerInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') submitAnswer();
+            });
+            document.getElementById('skipBtn').addEventListener('click', skipPuzzle);
+            document.getElementById('newGameBtn').addEventListener('click', initializeGame);
+            document.getElementById('playAgainBtn').addEventListener('click', initializeGame);
+            
+            initializeGame();
+            document.getElementById('answerInput').focus();
+        });
+    </script>
+ </body>
+</html>
+

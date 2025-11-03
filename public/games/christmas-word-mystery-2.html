@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cozy Christmas Word Mystery</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        .attempts-counter {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .word-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+        }
+
+        .letter-tile {
+            aspect-ratio: 1;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: rgba(15, 23, 42, 0.8);
+            color: #f8fafc;
+            transition: all 0.3s ease;
+        }
+
+        .letter-tile.filled {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .letter-tile.correct {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+        .letter-tile.present {
+            background: #f59e0b;
+            color: white;
+            border-color: #f59e0b;
+        }
+
+        .letter-tile.absent {
+            background: #64748b;
+            color: #cbd5e1;
+            border-color: #64748b;
+        }
+
+        .keyboard {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: nowrap;
+        }
+
+        .keyboard-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .key {
+            padding: 0.75rem 0.5rem;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.5rem;
+            background: rgba(30, 41, 59, 0.8);
+            color: #f8fafc;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1 1 auto;
+            min-width: 0;
+            max-width: 32px;
+            text-align: center;
+            font-size: 0.875rem;
+            box-sizing: border-box;
+        }
+
+        .key:hover {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .key.wide {
+            padding: 0.75rem 0.75rem;
+            font-size: 0.75rem;
+            min-width: 50px;
+            max-width: 65px;
+            flex: 1.5 1 auto;
+        }
+
+        .key.correct {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+        .key.present {
+            background: #f59e0b;
+            color: white;
+            border-color: #f59e0b;
+        }
+
+        .key.absent {
+            background: #64748b;
+            color: #cbd5e1;
+            border-color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .game-board {
+                padding: 0.75rem;
+                gap: 0.375rem;
+            }
+
+            .word-row {
+                gap: 0.375rem;
+            }
+
+            .letter-tile {
+                font-size: 0.875rem;
+                min-height: 32px;
+            }
+
+            .keyboard {
+                padding: 0.75rem;
+            }
+
+            .keyboard-row {
+                gap: 0.2rem;
+                margin-bottom: 0.375rem;
+            }
+
+            .key {
+                padding: 0.5rem 0.375rem;
+                font-size: 0.75rem;
+                max-width: 28px;
+                min-width: 28px;
+            }
+
+            .key.wide {
+                padding: 0.5rem 0.5rem;
+                font-size: 0.7rem;
+                min-width: 45px;
+                max-width: 55px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .letter-tile {
+                font-size: 0.75rem;
+                min-height: 28px;
+            }
+
+            .key {
+                padding: 0.45rem 0.3rem;
+                font-size: 0.7rem;
+                max-width: 24px;
+                min-width: 24px;
+            }
+
+            .key.wide {
+                padding: 0.45rem 0.45rem;
+                font-size: 0.65rem;
+                min-width: 40px;
+                max-width: 50px;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 22</div>
+    <h1 class="puzzle-title" id="gameTitle">Cozy Christmas Word Mystery</h1>
+    <p class="mystery-subtitle" id="hintText">🎄 Solve the festive mystery word! 🎄</p>
+   </header>
+
+   <main class="puzzle-container">
+    <div class="attempts-counter" id="attemptsCounter">Attempt 1 of 6</div>
+    
+    <div class="game-board" id="gameBoard">
+     <!-- Game rows will be generated here -->
+    </div>
+
+    <div class="keyboard" id="keyboard">
+     <div class="keyboard-row">
+      <div class="key" data-key="Q">Q</div>
+      <div class="key" data-key="W">W</div>
+      <div class="key" data-key="E">E</div>
+      <div class="key" data-key="R">R</div>
+      <div class="key" data-key="T">T</div>
+      <div class="key" data-key="Y">Y</div>
+      <div class="key" data-key="U">U</div>
+      <div class="key" data-key="I">I</div>
+      <div class="key" data-key="O">O</div>
+      <div class="key" data-key="P">P</div>
+     </div>
+     <div class="keyboard-row">
+      <div class="key" data-key="A">A</div>
+      <div class="key" data-key="S">S</div>
+      <div class="key" data-key="D">D</div>
+      <div class="key" data-key="F">F</div>
+      <div class="key" data-key="G">G</div>
+      <div class="key" data-key="H">H</div>
+      <div class="key" data-key="J">J</div>
+      <div class="key" data-key="K">K</div>
+      <div class="key" data-key="L">L</div>
+     </div>
+     <div class="keyboard-row">
+      <div class="key wide" data-key="ENTER">ENTER</div>
+      <div class="key" data-key="Z">Z</div>
+      <div class="key" data-key="X">X</div>
+      <div class="key" data-key="C">C</div>
+      <div class="key" data-key="V">V</div>
+      <div class="key" data-key="B">B</div>
+      <div class="key" data-key="N">N</div>
+      <div class="key" data-key="M">M</div>
+      <div class="key wide" data-key="BACKSPACE">⌫</div>
+     </div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+   </main>
+
+   <div class="success-animation" id="success-animation"></div>
+  </div>
+
+  <script>
+        const defaultConfig = {
+            game_title: "Cozy Christmas Word Mystery",
+            daily_word: "SLEET",
+            hint_text: "🎄 Solve the festive mystery word! 🎄"
+        };
+
+        let targetWord = defaultConfig.daily_word.toUpperCase();
+        let currentRow = 0;
+        let currentCol = 0;
+        let gameOver = false;
+        let guesses = [];
+
+        const christmasWords = [
+            "SLEET", "SPARK", "TWINK", "GLEAM", "SHINE", "MERRY", "CHEER", "BLISS",
+            "JOLLY", "HAPPY", "PEACE", "FAITH", "GIVING", "SHARE", "CARES", "HEART",
+            "LAUGH", "DANCE", "PARTY", "ANGEL", "BELLS", "CAROL", "GIFTS", "HOLLY"
+        ];
+
+        function initializeBoard() {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = '';
+            
+            for (let row = 0; row < 6; row++) {
+                const wordRow = document.createElement('div');
+                wordRow.className = 'word-row';
+                
+                for (let col = 0; col < 5; col++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'letter-tile';
+                    tile.id = `tile-${row}-${col}`;
+                    wordRow.appendChild(tile);
+                }
+                
+                gameBoard.appendChild(wordRow);
+            }
+        }
+
+        function handleKeyInput(key) {
+            if (gameOver) return;
+
+            if (key === 'ENTER') {
+                if (currentCol === 5) {
+                    submitGuess();
+                } else {
+                    showFeedback('Not enough letters!', 'error');
+                }
+            } else if (key === 'BACKSPACE') {
+                if (currentCol > 0) {
+                    currentCol--;
+                    const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
+                    tile.textContent = '';
+                    tile.classList.remove('filled');
+                }
+            } else if (currentCol < 5 && /^[A-Z]$/.test(key)) {
+                const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
+                tile.textContent = key;
+                tile.classList.add('filled');
+                currentCol++;
+            }
+        }
+
+        function submitGuess() {
+            const guess = [];
+            for (let col = 0; col < 5; col++) {
+                const tile = document.getElementById(`tile-${currentRow}-${col}`);
+                guess.push(tile.textContent);
+            }
+            
+            const guessWord = guess.join('');
+            guesses.push(guessWord);
+            
+            const letterCounts = {};
+            for (let char of targetWord) {
+                letterCounts[char] = (letterCounts[char] || 0) + 1;
+            }
+            
+            const results = new Array(5).fill('absent');
+            
+            for (let i = 0; i < 5; i++) {
+                if (guess[i] === targetWord[i]) {
+                    results[i] = 'correct';
+                    letterCounts[guess[i]]--;
+                }
+            }
+            
+            for (let i = 0; i < 5; i++) {
+                if (results[i] === 'absent' && letterCounts[guess[i]] > 0) {
+                    results[i] = 'present';
+                    letterCounts[guess[i]]--;
+                }
+            }
+            
+            for (let col = 0; col < 5; col++) {
+                const tile = document.getElementById(`tile-${currentRow}-${col}`);
+                const keyElement = document.querySelector(`[data-key="${guess[col]}"]`);
+                
+                setTimeout(() => {
+                    tile.classList.add(results[col]);
+                    
+                    if (keyElement) {
+                        if (results[col] === 'correct' || 
+                            (results[col] === 'present' && !keyElement.classList.contains('correct')) ||
+                            (results[col] === 'absent' && !keyElement.classList.contains('correct') && !keyElement.classList.contains('present'))) {
+                            keyElement.className = `key ${results[col]}`;
+                        }
+                    }
+                }, col * 100);
+            }
+            
+            if (guessWord === targetWord) {
+                setTimeout(() => {
+                    gameOver = true;
+                    showFeedback('🎉 Magnificent! You solved the mystery! 🎉', 'success');
+                    createSuccessAnimation();
+                }, 500);
+                return;
+            }
+            
+            currentRow++;
+            currentCol = 0;
+            
+            if (currentRow >= 6) {
+                setTimeout(() => {
+                    gameOver = true;
+                    showFeedback(`🎄 The mystery word was: ${targetWord} 🎄`, 'error');
+                }, 500);
+            } else {
+                updateAttemptsCounter();
+            }
+        }
+
+        function showFeedback(text, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = text;
+            feedback.className = `feedback ${type}`;
+            feedback.offsetHeight;
+            feedback.classList.add('show');
+            
+            if (type === 'error') {
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('success-animation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    animation.appendChild(particle);
+                    setTimeout(() => particle.remove(), 2000);
+                }, i * 50);
+            }
+        }
+
+        function updateAttemptsCounter() {
+            const counter = document.getElementById('attemptsCounter');
+            counter.textContent = `Attempt ${currentRow + 1} of 6`;
+        }
+
+        document.getElementById('keyboard').addEventListener('click', (e) => {
+            if (e.target.classList.contains('key')) {
+                const key = e.target.getAttribute('data-key');
+                handleKeyInput(key);
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toUpperCase();
+            if (key === 'ENTER' || key === 'BACKSPACE' || /^[A-Z]$/.test(key)) {
+                e.preventDefault();
+                handleKeyInput(key);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeBoard();
+            updateAttemptsCounter();
+        });
+    </script>
+ </body>
+</html>
+

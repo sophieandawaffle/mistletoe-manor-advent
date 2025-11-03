@@ -1,0 +1,521 @@
+/* Modern Advent Calendar Design System */
+
+/* Base Styles */
+body {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Inter', -webkit-system-font, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    color: #f8fafc;
+    overflow-x: hidden;
+}
+
+html {
+    height: 100%;
+}
+
+/* Container */
+.container {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+}
+
+/* Snowflakes */
+.snowflake {
+    position: absolute;
+    color: rgba(248, 250, 252, 0.6);
+    font-size: 1rem;
+    animation: fall linear infinite;
+    pointer-events: none;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(calc(100% + 100px)) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Header */
+.advent-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    z-index: 10;
+}
+
+.day-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+}
+
+.puzzle-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.mystery-subtitle {
+    font-size: 1.125rem;
+    color: #94a3b8;
+    font-weight: 300;
+}
+
+/* Puzzle Container */
+.puzzle-container {
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+/* Input Fields */
+.input-section {
+    margin-bottom: 2rem;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #cbd5e1;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.solution-input,
+.answer-input {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    border: 2px solid rgba(148, 163, 184, 0.3);
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    font-size: 1.125rem;
+    color: #f8fafc;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.solution-input:focus,
+.answer-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.solution-input::placeholder,
+.answer-input::placeholder {
+    color: #64748b;
+}
+
+/* Buttons */
+.submit-button,
+.btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: inherit;
+}
+
+.submit-button:hover,
+.btn:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.submit-button:active,
+.btn:active {
+    transform: translateY(0);
+}
+
+.submit-button:disabled,
+.btn:disabled {
+    background: #374151;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.submit-button.secondary,
+.btn-secondary {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+}
+
+.submit-button.secondary:hover,
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
+}
+
+.button-group {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+/* Display Areas */
+.cipher-display,
+.game-area,
+.display-area {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.cipher-text,
+.display-text {
+    font-family: 'Courier New', monospace;
+    font-size: 1.5rem;
+    letter-spacing: 0.2em;
+    color: #fbbf24;
+    margin-bottom: 1rem;
+    word-break: break-all;
+}
+
+.cipher-hint,
+.hint-text {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* Feedback Messages */
+.feedback {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.feedback.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.feedback.success,
+.message.success {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+}
+
+.feedback.error,
+.message.error {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+/* Progress Indicators */
+.progress-container {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.progress-text {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin-bottom: 0.75rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 4px;
+}
+
+/* Success Animation */
+.success-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.success-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #fbbf24;
+    border-radius: 50%;
+    animation: celebrate 2s ease-out forwards;
+}
+
+@keyframes celebrate {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-200px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Hint Container */
+.hint-container {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 0.75rem;
+    display: none;
+    font-size: 0.875rem;
+    color: #cbd5e1;
+}
+
+.hint-container.show {
+    display: block;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hint-title {
+    font-weight: 600;
+    color: #60a5fa;
+    margin-bottom: 0.5rem;
+}
+
+/* Modal */
+.completion-modal,
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 3rem;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    text-align: center;
+    max-width: 500px;
+    margin: 1rem;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modal-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.modal-text {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #cbd5e1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 0.75rem;
+        min-height: 100vh;
+        justify-content: flex-start;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .advent-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .day-badge {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .puzzle-title {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .mystery-subtitle {
+        font-size: 0.95rem;
+        padding: 0 0.5rem;
+    }
+
+    .puzzle-container {
+        padding: 1.25rem;
+        max-width: 100%;
+        border-radius: 1rem;
+    }
+
+    .cipher-display,
+    .game-area,
+    .display-area {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .cipher-text,
+    .display-text {
+        font-size: 1.125rem;
+        letter-spacing: 0.1em;
+        word-break: break-word;
+        line-height: 1.4;
+    }
+
+    .cipher-hint,
+    .hint-text {
+        font-size: 0.8rem;
+    }
+
+    .input-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-label {
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .solution-input,
+    .answer-input {
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .submit-button,
+    .btn {
+        width: 100%;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .modal-content {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+        max-width: calc(100% - 2rem);
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+    }
+
+    .modal-text {
+        font-size: 1rem;
+    }
+
+    .progress-container {
+        margin: 1rem 0;
+    }
+
+    .progress-text {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0.5rem;
+    }
+
+    .puzzle-container {
+        padding: 1rem;
+    }
+
+    .puzzle-title {
+        font-size: 1.5rem;
+    }
+
+    .mystery-subtitle {
+        font-size: 0.875rem;
+    }
+
+    .cipher-display,
+    .game-area,
+    .display-area {
+        padding: 1rem;
+    }
+
+    .cipher-text,
+    .display-text {
+        font-size: 1rem;
+    }
+}
+

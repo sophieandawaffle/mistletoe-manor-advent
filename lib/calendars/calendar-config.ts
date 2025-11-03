@@ -27,8 +27,19 @@ export const calendars: Record<string, CalendarConfig> = {
       accent: "hsl(var(--accent))",
     },
   },
-  // Add future calendars here:
-  // "another-calendar": { ... }
+  "christmas-conspiracy": {
+    id: "christmas-conspiracy",
+    name: "Christmas Conspiracy",
+    slug: "christmas-conspiracy",
+    description: "A festive conspiracy advent calendar",
+    heroImage: "/images/achristmasconspiracy.svg",
+    backgroundColor: "bg-[url('/images/xmasconspiracybckg.svg')]",
+    theme: {
+      primary: "hsl(var(--primary))",
+      secondary: "hsl(var(--secondary))",
+      accent: "hsl(var(--accent))",
+    },
+  },
 }
 
 export function getCalendarBySlug(slug: string): CalendarConfig | null {

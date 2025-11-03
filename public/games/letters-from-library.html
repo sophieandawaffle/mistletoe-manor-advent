@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Letters from the Library</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .word-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            justify-content: center;
+            padding: 0.75rem;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 0.5rem;
+        }
+
+        .word-option {
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #cbd5e1;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .word-option:hover {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .word-option.selected {
+            background: rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6;
+            color: #f8fafc;
+        }
+
+        #puzzleContainer {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .puzzle-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            text-align: center;
+            min-height: auto;
+        }
+        
+        .puzzle-item > div:first-child {
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .puzzle-item .drop-zone {
+            font-size: 0.75rem;
+            min-height: 35px;
+            padding: 0.25rem;
+        }
+        
+        .puzzle-item .movie-reveal {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            #puzzleContainer {
+                grid-template-columns: 1fr;
+            }
+            
+            .word-options {
+                gap: 0.4rem;
+                padding: 0.5rem;
+            }
+            
+            .word-option {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.75rem;
+            }
+            
+            .puzzle-item {
+                padding: 0.6rem;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 6</div>
+    <h1 class="puzzle-title" id="gameTitle">Letters from the Library</h1>
+    <p class="mystery-subtitle" id="subtitle">Match the Christmas movie analogies</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <div class="instructions" style="text-align: center; margin-bottom: 1rem; color: #cbd5e1; font-size: 0.85rem; padding: 0.75rem; background: rgba(15, 23, 42, 0.6); border-radius: 0.5rem;">
+     <p id="instructionText" style="margin: 0;">Use the clue words to figure out which Christmas movie title to build! Drag the title words from above to complete each famous holiday film name.</p>
+    </div>
+    <div class="word-options" id="wordOptions">
+     <!-- Draggable words will be generated here -->
+    </div>
+    <div id="puzzleContainer" style="margin-top: 1rem;">
+     <!-- Puzzles will be generated here -->
+    </div>
+    <div class="completion-message" id="completionMessage" style="display: none; margin-top: 1rem; text-align: center; color: #cbd5e1; background: rgba(34, 197, 94, 0.2); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(34, 197, 94, 0.3); font-size: 0.85rem;">
+     🎄 Ho ho ho! You've solved all the Christmas movie mysteries! Time for some hot cocoa and holiday films! 🎄
+    </div>
+    <div style="text-align: center; margin-top: 1rem;">
+     <button id="resetButton" class="submit-button">Reset Game</button>
+    </div>
+   </main>
+  </div>
+  <script>
+        // Christmas Movie Game data
+        const puzzles = [
+            {
+                analogy: ["Burglars", "Traps", "Kevin", "?"],
+                acceptedAnswers: ["Home", "Alone"],
+                movie: "Home Alone"
+            },
+            {
+                analogy: ["Wings", "Bell", "Angel", "?"],
+                acceptedAnswers: ["Wonderful", "Life"],
+                movie: "It's a Wonderful Life"
+            },
+            {
+                analogy: ["Scrooge", "Ghosts", "Spirit", "?"],
+                acceptedAnswers: ["Christmas", "Carol"],
+                movie: "A Christmas Carol"
+            },
+            {
+                analogy: ["Buddy", "Santa", "Workshop", "?"],
+                acceptedAnswers: ["Elf"],
+                movie: "Elf"
+            },
+            {
+                analogy: ["Train", "Journey", "Believe", "?"],
+                acceptedAnswers: ["Polar", "Express"],
+                movie: "The Polar Express"
+            },
+            {
+                analogy: ["Whoville", "Mean", "Heart", "?"],
+                acceptedAnswers: ["Grinch", "How", "Stole"],
+                movie: "How the Grinch Stole Christmas"
+            }
+        ];
+
+        // All movie title words that can be dragged
+        const allMovieTitleWords = [
+            "Home", "Alone", "Wonderful", "Life", "Christmas", "Carol", 
+            "Elf", "Express", "Polar", "Grinch", "How", "Stole"
+        ];
+
+        let currentPuzzles = [];
+        let allOptions = [];
+        let completedCount = 0;
+
+        // Create snowfall effect (now handled by design system)
+        function createSnowfall() {
+            // No-op, handled by CSS
+        }
+
+        function initGame() {
+            currentPuzzles = [...puzzles];
+            allOptions = [...allMovieTitleWords];
+            completedCount = 0;
+            
+            generatePuzzles();
+            generateWordOptions();
+            
+            const completionMsg = document.getElementById('completionMessage');
+            if (completionMsg) {
+                completionMsg.style.display = 'none';
+                completionMsg.classList.remove('show');
+            }
+        }
+
+        function generatePuzzles() {
+            const container = document.getElementById('puzzleContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            currentPuzzles.forEach((puzzle, index) => {
+                const puzzleDiv = document.createElement('div');
+                puzzleDiv.className = 'puzzle-item';
+                puzzleDiv.style.cssText = 'background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 0.75rem; padding: 1rem; text-align: center;';
+                
+                puzzleDiv.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 0.5rem; color: #f8fafc; font-size: 0.8rem;">Christmas Clue ${index + 1}</div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                        <div style="background: rgba(59, 130, 246, 0.3); padding: 0.4rem 0.6rem; border-radius: 0.5rem; font-weight: 600; color: #cbd5e1; font-size: 0.75rem;">${puzzle.analogy[0]}</div>
+                        <div style="color: #94a3b8; font-size: 0.7rem;">:</div>
+                        <div style="background: rgba(59, 130, 246, 0.3); padding: 0.4rem 0.6rem; border-radius: 0.5rem; font-weight: 600; color: #cbd5e1; font-size: 0.75rem;">${puzzle.analogy[1]}</div>
+                        <div style="color: #94a3b8; font-size: 0.7rem;">::</div>
+                        <div style="background: rgba(59, 130, 246, 0.3); padding: 0.4rem 0.6rem; border-radius: 0.5rem; font-weight: 600; color: #cbd5e1; font-size: 0.75rem;">${puzzle.analogy[2]}</div>
+                        <div style="color: #94a3b8; font-size: 0.7rem;">:</div>
+                        <div class="drop-zone" data-accepted-answers="${puzzle.acceptedAnswers.join(',')}" data-puzzle="${index}" data-movie="${puzzle.movie}" style="min-width: 80px; min-height: 35px; border: 2px dashed rgba(148, 163, 184, 0.5); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; background: rgba(30, 41, 59, 0.8); cursor: pointer; font-style: italic; color: #94a3b8; font-size: 0.75rem;">
+                            Drop here
+                        </div>
+                    </div>
+                    <div class="movie-reveal" id="movieReveal${index}" style="display: none; margin-top: 0.5rem; color: #4ade80; font-weight: 600; font-size: 0.8rem;">
+                        🎬 "${puzzle.movie}" 🎬
+                    </div>
+                `;
+                
+                container.appendChild(puzzleDiv);
+            });
+            
+            setupDropZones();
+        }
+
+        function generateWordOptions() {
+            const container = document.getElementById('wordOptions');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            const shuffledOptions = [...allOptions].sort(() => Math.random() - 0.5);
+            
+            shuffledOptions.forEach(word => {
+                const wordDiv = document.createElement('div');
+                wordDiv.className = 'word-option';
+                wordDiv.draggable = true;
+                wordDiv.textContent = word;
+                wordDiv.dataset.word = word;
+                
+                container.appendChild(wordDiv);
+            });
+            
+            setupDragAndDrop();
+        }
+
+        function setupDropZones() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('drop', handleDrop);
+                zone.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        function setupDragAndDrop() {
+            const draggableWords = document.querySelectorAll('.word-option');
+            
+            draggableWords.forEach(word => {
+                word.addEventListener('dragstart', handleDragStart);
+                word.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        function handleDragStart(e) {
+            if (e.target.classList.contains('selected')) {
+                e.preventDefault();
+                return;
+            }
+            e.dataTransfer.setData('text/plain', e.target.dataset.word);
+            e.target.style.opacity = '0.5';
+        }
+
+        function handleDragEnd(e) {
+            e.target.style.opacity = '1';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            if (!e.target.classList.contains('filled')) {
+                e.target.style.borderColor = '#3b82f6';
+                e.target.style.background = 'rgba(59, 130, 246, 0.2)';
+            }
+        }
+
+        function handleDragLeave(e) {
+            e.target.style.borderColor = 'rgba(148, 163, 184, 0.5)';
+            e.target.style.background = 'rgba(30, 41, 59, 0.8)';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            handleDragLeave(e);
+            
+            if (e.target.classList.contains('filled')) {
+                return;
+            }
+            
+            const droppedWord = e.dataTransfer.getData('text/plain');
+            const acceptedAnswers = e.target.dataset.acceptedAnswers.split(',');
+            const puzzleIndex = e.target.dataset.puzzle;
+            
+            if (acceptedAnswers.includes(droppedWord)) {
+                e.target.textContent = droppedWord;
+                e.target.classList.add('filled');
+                e.target.style.cssText = 'min-width: 80px; min-height: 35px; border: 2px solid #3b82f6; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; background: rgba(59, 130, 246, 0.5); cursor: default; font-weight: 600; color: #f8fafc; font-size: 0.75rem;';
+                
+                const usedWord = document.querySelector(`[data-word="${droppedWord}"]`);
+                if (usedWord && !usedWord.classList.contains('selected')) {
+                    usedWord.classList.add('selected');
+                    usedWord.draggable = false;
+                }
+                
+                const movieReveal = document.getElementById(`movieReveal${puzzleIndex}`);
+                if (movieReveal) {
+                    setTimeout(() => {
+                        movieReveal.style.display = 'block';
+                    }, 300);
+                }
+                
+                completedCount++;
+                
+                const allFilled = document.querySelectorAll('.drop-zone.filled').length;
+                if (allFilled === currentPuzzles.length) {
+                    setTimeout(showCompletion, 800);
+                }
+            } else {
+                e.target.style.borderColor = '#ef4444';
+                e.target.style.background = 'rgba(239, 68, 68, 0.2)';
+                setTimeout(() => {
+                    e.target.style.borderColor = 'rgba(148, 163, 184, 0.5)';
+                    e.target.style.background = 'rgba(30, 41, 59, 0.8)';
+                }, 1000);
+            }
+        }
+
+        function showCompletion() {
+            const message = document.getElementById('completionMessage');
+            if (message) {
+                message.style.display = 'block';
+                message.classList.add('show');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initGame();
+        });
+
+        // Add reset button if it doesn't exist
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.puzzle-container');
+            if (container && !document.getElementById('resetButton')) {
+                const resetBtn = document.createElement('button');
+                resetBtn.id = 'resetButton';
+                resetBtn.className = 'submit-button';
+                resetBtn.textContent = 'Reset Game';
+                resetBtn.style.cssText = 'margin-top: 1.5rem;';
+                resetBtn.addEventListener('click', function() {
+                    initGame();
+                });
+                container.appendChild(resetBtn);
+            }
+        });
+    </script>
+ </body>
+</html>

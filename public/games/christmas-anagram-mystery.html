@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christmas Anagram Mystery</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.7rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+        }
+
+        .score {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .word-display {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .scrambled-word {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fbbf24;
+            letter-spacing: 0.3rem;
+            margin-bottom: 0.7rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 0.7rem;
+            letter-spacing: 0.05rem;
+        }
+
+        .difficulty-easy {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .difficulty-medium {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .difficulty-hard {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .difficulty-expert {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .progress {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 0.75rem;
+            }
+
+            .score {
+                font-size: 0.8rem;
+            }
+
+            .scrambled-word {
+                font-size: 1.5rem;
+                letter-spacing: 0.2rem;
+            }
+
+            .difficulty-badge {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .scrambled-word {
+                font-size: 1.25rem;
+                letter-spacing: 0.15rem;
+            }
+
+            .score {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 3</div>
+    <h1 class="puzzle-title" id="game-title">Christmas Anagram Mystery</h1>
+    <p class="mystery-subtitle" id="subtitle">Unscramble the festive words</p>
+   </header>
+
+   <main class="puzzle-container">
+   <div class="progress">
+    <div class="score" id="score">
+     Score: 0
+    </div>
+    <div class="score" id="word-counter">
+     Word 1 of 15
+    </div>
+    <div class="score" id="timer">
+     Time: 0s
+    </div>
+   </div>
+   <div class="game-area">
+    <div class="word-display">
+     <div class="difficulty-badge" id="difficulty-badge">
+      EXPERT
+     </div>
+     <div class="scrambled-word" id="scrambled-word">
+      NECKFRANINES
+     </div>
+     <div class="hint" id="hint">
+      Precious aromatic resin brought by the wise men
+     </div>
+    </div>
+    <div class="input-section">
+     <label for="answer-input" class="input-label">Enter your answer:</label>
+     <input type="text" class="solution-input" id="answer-input" placeholder="Type your answer here..." autocomplete="off">
+    </div>
+    <div class="button-group">
+     <button class="submit-button" id="submit-btn">Submit Answer</button>
+     <button class="submit-button secondary" id="hint-btn">Show Hint</button>
+     <button class="submit-button secondary" id="skip-btn">Skip Word</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+     </div>
+   </main>
+  </div>
+  <div class="completion-modal" id="completion-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;">
+   <div style="background: rgba(15, 23, 42, 0.95); padding: 3rem; border-radius: 1rem; border: 1px solid rgba(148, 163, 184, 0.3); max-width: 500px; text-align: center;">
+    <h2 class="puzzle-title" style="font-size: 2rem; margin-bottom: 1rem;">🎄 Mystery Solved! 🎄</h2>
+    <p class="mystery-subtitle" id="completion-text" style="margin-bottom: 2rem;">Congratulations! You've solved all the Christmas mysteries!</p>
+    <button class="submit-button" id="play-again-btn">Play Again</button>
+   </div>
+  </div>
+  <script>
+        const defaultConfig = {
+            game_title: "Christmas Anagram Mystery",
+            subtitle: "Unscramble the festive words",
+            success_message: "Splendid! You've solved the mystery!",
+            completion_message: "Congratulations! You've solved all the Christmas mysteries!"
+        };
+
+        let config = { ...defaultConfig };
+
+        const words = [
+            { word: "FRANKINCENSE", scrambled: "NECKFRANINES", hint: "Precious aromatic resin brought by the wise men", difficulty: "expert" },
+            { word: "EPIPHANY", scrambled: "HYNAPEPI", hint: "January 6th celebration of the three kings", difficulty: "hard" },
+            { word: "WASSAILING", scrambled: "GLINWASSAI", hint: "Traditional caroling with mulled cider", difficulty: "expert" },
+            { word: "NUTCRACKER", scrambled: "RACKNUTCER", hint: "Ballet about a magical Christmas toy soldier", difficulty: "hard" },
+            { word: "BETHLEHEM", scrambled: "HEMBLETEH", hint: "Biblical birthplace of Jesus Christ", difficulty: "medium" },
+            { word: "POINSETTIA", scrambled: "TIAPOINTES", hint: "Red flowering plant popular at Christmas", difficulty: "hard" },
+            { word: "MYRRH", scrambled: "RHYMR", hint: "Bitter aromatic gum resin gift from wise men", difficulty: "medium" },
+            { word: "ADVENT", scrambled: "VENTAD", hint: "Four-week period before Christmas", difficulty: "easy" },
+            { word: "SLEIGHBELLS", scrambled: "BELLSGHILES", hint: "Jingling sounds from Santa's transportation", difficulty: "expert" },
+            { word: "SHEPHERDS", scrambled: "HERDSHEPS", hint: "First to hear the angels' announcement", difficulty: "medium" },
+            { word: "CRANBERRIES", scrambled: "RANCBERRIES", hint: "Tart red berries in holiday sauce", difficulty: "hard" },
+            { word: "CHIMNEY", scrambled: "YMNEHIC", hint: "Santa's preferred entrance to homes", difficulty: "easy" },
+            { word: "FRANKENSTEIN", scrambled: "NKENSTERFINA", hint: "Not Christmas, but sounds like Frankincense!", difficulty: "expert" },
+            { word: "PARTRIDGE", scrambled: "GERDTRAIP", hint: "Bird in a pear tree from the famous song", difficulty: "medium" },
+            { word: "SUGARPLUMS", scrambled: "GARSUMPULS", hint: "Sweet treats that dance in children's heads", difficulty: "hard" }
+        ];
+
+        let currentWordIndex = 0;
+        let score = 0;
+        let hintShown = false;
+        let startTime = Date.now();
+        let timerInterval;
+
+        function displayCurrentWord() {
+            const currentWord = words[currentWordIndex];
+            document.getElementById('scrambled-word').textContent = currentWord.scrambled;
+            document.getElementById('hint').textContent = currentWord.hint;
+            document.getElementById('word-counter').textContent = `Word ${currentWordIndex + 1} of ${words.length}`;
+            
+            // Update difficulty badge
+            const badge = document.getElementById('difficulty-badge');
+            badge.textContent = currentWord.difficulty.toUpperCase();
+            badge.className = `difficulty-badge difficulty-${currentWord.difficulty}`;
+            
+            document.getElementById('answer-input').value = '';
+            document.getElementById('feedback').textContent = '';
+            hintShown = false;
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answer-input').value.trim().toUpperCase();
+            const currentWord = words[currentWordIndex];
+            const correctAnswer = currentWord.word;
+            const feedback = document.getElementById('feedback');
+
+            if (userAnswer === correctAnswer) {
+                // Difficulty-based scoring
+                const difficultyMultiplier = {
+                    'easy': 1,
+                    'medium': 2,
+                    'hard': 3,
+                    'expert': 5
+                };
+                
+                const basePoints = hintShown ? 5 : 15;
+                const points = basePoints * difficultyMultiplier[currentWord.difficulty];
+                score += points;
+                
+                document.getElementById('score').textContent = `Score: ${score}`;
+                feedback.textContent = `${config.success_message || defaultConfig.success_message} (+${points} points)`;
+                feedback.className = 'feedback success';
+                
+                setTimeout(() => {
+                    nextWord();
+                }, 1500);
+            } else {
+                feedback.textContent = 'Not quite right. Try again!';
+                feedback.className = 'feedback error';
+            }
+        }
+
+        function showHint() {
+            const currentWord = words[currentWordIndex];
+            const hint = `Hint: The word starts with "${currentWord.word[0]}" and has ${currentWord.word.length} letters`;
+            document.getElementById('feedback').textContent = hint;
+            document.getElementById('feedback').className = 'feedback';
+            hintShown = true;
+        }
+
+        function skipWord() {
+            nextWord();
+        }
+
+        function nextWord() {
+            currentWordIndex++;
+
+            if (currentWordIndex >= words.length) {
+                showCompletionModal();
+            } else {
+                displayCurrentWord();
+            }
+        }
+
+        function showCompletionModal() {
+            stopTimer();
+            const finalTime = Math.floor((Date.now() - startTime) / 1000);
+            const completionText = `${config.completion_message || defaultConfig.completion_message} Final Score: ${score} points in ${finalTime} seconds!`;
+            document.getElementById('completion-text').textContent = completionText;
+            const modal = document.getElementById('completion-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('timer').textContent = `Time: ${elapsed}s`;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+        }
+
+        function resetGame() {
+            currentWordIndex = 0;
+            score = 0;
+            startTime = Date.now();
+            document.getElementById('score').textContent = 'Score: 0';
+            document.getElementById('timer').textContent = 'Time: 0s';
+            const modal = document.getElementById('completion-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            stopTimer();
+            startTimer();
+            displayCurrentWord();
+        }
+
+        function createSnowflakes() {
+            const snowfall = document.getElementById('snowfall');
+            const snowflakes = ['❄', '❅', '❆'];
+            
+            function createSnowflake() {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.innerHTML = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+                snowflake.style.left = Math.random() * 100 + '%';
+                snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                snowflake.style.opacity = Math.random();
+                snowfall.appendChild(snowflake);
+                
+                setTimeout(() => {
+                    if (snowflake.parentNode) {
+                        snowflake.parentNode.removeChild(snowflake);
+                    }
+                }, 5000);
+            }
+            
+            setInterval(createSnowflake, 300);
+        }
+
+        // Event listeners
+        document.getElementById('submit-btn').addEventListener('click', checkAnswer);
+        document.getElementById('hint-btn').addEventListener('click', showHint);
+        document.getElementById('skip-btn').addEventListener('click', skipWord);
+        document.getElementById('play-again-btn').addEventListener('click', resetGame);
+
+        document.getElementById('answer-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', function() {
+            displayCurrentWord();
+            startTimer();
+        });
+    </script>
+ </body>
+</html>
+

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christmas Mystery Cipher</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .cipher-display {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .cipher-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            letter-spacing: 0.2em;
+            color: #fbbf24;
+            margin-bottom: 1rem;
+            word-break: break-all;
+        }
+
+        .cipher-hint {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .cipher-display {
+                padding: 1.25rem;
+            }
+
+            .cipher-text {
+                font-size: 1.125rem;
+                letter-spacing: 0.15em;
+            }
+
+            .cipher-hint {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cipher-text {
+                font-size: 1rem;
+                letter-spacing: 0.1em;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge" id="dayBadge">Day 10</div>
+    <h1 class="puzzle-title" id="puzzleTitle">The Christmas Cipher</h1>
+    <p class="mystery-subtitle" id="mysteryMessage">A secret message awaits those clever enough to decode it...</p>
+   </header>
+
+   <main class="puzzle-container">
+    <div class="cipher-display">
+     <div class="cipher-text" id="cipherText">FKULVWPDV PDJLF LV UHDO</div>
+     <div class="cipher-hint">🔍 Each letter has been shifted by the same amount</div>
+    </div>
+
+    <div class="input-section">
+     <label for="solutionInput" class="input-label">Enter the decoded message:</label>
+     <input type="text" id="solutionInput" class="solution-input" placeholder="Type your answer here..." autocomplete="off">
+    </div>
+
+    <button type="button" class="submit-button" id="submitButton">Solve the Mystery</button>
+
+    <div class="feedback" id="feedback"></div>
+   </main>
+  </div>
+
+  <div class="success-animation" id="successAnimation"></div>
+
+  <script>
+        // Default configuration
+        const defaultConfig = {
+            day_number: "Day 10",
+            puzzle_title: "The Christmas Cipher",
+            mystery_message: "A secret message awaits those clever enough to decode it...",
+            success_message: "Well done, detective! You've cracked the Christmas cipher!"
+        };
+
+        // Puzzle logic
+        const correctAnswer = "CHRISTMAS MAGIC IS REAL";
+        const cipherShift = 3; // Caesar cipher with shift of 3
+
+        function generateCipher(text, shift) {
+            return text.split('').map(char => {
+                if (char.match(/[A-Z]/)) {
+                    return String.fromCharCode(((char.charCodeAt(0) - 65 + shift) % 26) + 65);
+                }
+                return char;
+            }).join('');
+        }
+
+        function checkSolution() {
+            const userInput = document.getElementById('solutionInput').value.toUpperCase().trim();
+            const feedback = document.getElementById('feedback');
+            const submitButton = document.getElementById('submitButton');
+            
+            if (!userInput) {
+                showFeedback('Please enter your solution first.', 'error');
+                return;
+            }
+
+            if (userInput === correctAnswer) {
+                const successMsg = window.elementSdk?.config?.success_message || defaultConfig.success_message;
+                showFeedback(successMsg, 'success');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Mystery Solved! ✨';
+                createSuccessAnimation();
+            } else {
+                showFeedback('Not quite right. Try again, detective! 🕵️', 'error');
+                document.getElementById('solutionInput').value = '';
+                document.getElementById('solutionInput').focus();
+            }
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            
+            // Force reflow to ensure the transition works
+            feedback.offsetHeight;
+            feedback.classList.add('show');
+            
+            if (type === 'error') {
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('submitButton').addEventListener('click', checkSolution);
+        
+        document.getElementById('solutionInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkSolution();
+            }
+        });
+
+        // Element SDK integration
+        async function onConfigChange(config) {
+            const dayBadge = document.getElementById('dayBadge');
+            const puzzleTitle = document.getElementById('puzzleTitle');
+            const mysteryMessage = document.getElementById('mysteryMessage');
+            
+            if (dayBadge) {
+                dayBadge.textContent = config.day_number || defaultConfig.day_number;
+            }
+            if (puzzleTitle) {
+                puzzleTitle.textContent = config.puzzle_title || defaultConfig.puzzle_title;
+            }
+            if (mysteryMessage) {
+                mysteryMessage.textContent = config.mystery_message || defaultConfig.mystery_message;
+            }
+        }
+
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            };
+        }
+
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ["day_number", config.day_number || defaultConfig.day_number],
+                ["puzzle_title", config.puzzle_title || defaultConfig.puzzle_title],
+                ["mystery_message", config.mystery_message || defaultConfig.mystery_message],
+                ["success_message", config.success_message || defaultConfig.success_message]
+            ]);
+        }
+
+        // Initialize Element SDK
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities,
+                mapToEditPanelValues
+            });
+        }
+
+        // Initialize the puzzle
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('solutionInput').focus();
+        });
+    </script>
+ </body>
+</html>
+

@@ -38,25 +38,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ cal
       })
     }
 
-    // Check if order exists in database (with or without password - both are valid)
-    console.log("[v0] Checking if order exists...")
+    // Check if order exists in database for this specific calendar
+    console.log("[v0] Checking if order exists for this calendar...")
     const exists = await orderExists(calendarId, orderId)
-    console.log("[v0] Order exists:", exists)
+    console.log("[v0] Order exists for this calendar:", exists)
     
     if (!exists) {
-      // Order doesn't exist - create passwordless account automatically
-      console.log("[v0] Order doesn't exist, creating account...")
-      const accountCreated = await createPasswordlessAccount(calendarId, orderId)
-      console.log("[v0] Account created:", accountCreated)
+      // Order doesn't exist for this calendar - check if it exists in another calendar first
+      console.log("[v0] Order doesn't exist for this calendar, checking other calendars...")
+      const result = await createPasswordlessAccount(calendarId, orderId)
+      console.log("[v0] Account creation result:", result)
       
-      if (!accountCreated) {
-        console.error("[v0] Failed to create account for:", { calendarId, orderId })
-        return NextResponse.json({ error: "Failed to create account" }, { 
-          status: 500,
-          headers: {
-            'Content-Type': 'application/json',
+      if (!result.success) {
+        // Return specific error message if order belongs to different calendar
+        return NextResponse.json(
+          { error: result.error || "Failed to create account" },
+          {
+            status: result.error?.includes("different calendar") ? 403 : 500,
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
-        })
+        )
       }
     }
     

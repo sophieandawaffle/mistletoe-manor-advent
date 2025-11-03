@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Manor Cipher</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .story-text {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            color: #cbd5e1;
+            text-align: center;
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 1</div>
+    <h1 class="puzzle-title" id="puzzle-title">The Manor Cipher</h1>
+    <p class="mystery-subtitle" id="mystery-subtitle">A Christmas Mystery at <span id="manor-name">Mistletoe Manor</span></p>
+   </header>
+
+   <main class="puzzle-container">
+    <div class="story-text">
+     You've discovered an old parchment in the dusty study of the manor. The previous owner left behind a cryptic message, hidden beneath layers of an ancient cipher. Legend says it reveals the location of a precious Christmas treasure hidden somewhere within these walls. Can you decode the secret before the candles burn out?
+    </div>
+
+    <div class="cipher-display">
+     <div class="cipher-text" id="cipher-display">WKH FKULVWPDV WUHDVXUH LV KLGGHQ EHQHDWK WKH DQFLHQW RDN</div>
+     <div class="cipher-hint">🔍 Each letter has been shifted by the same amount</div>
+    </div>
+
+    <div class="progress-container">
+     <div class="progress-text" id="progress-text">Mystery Progress: 0% Complete</div>
+     <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+     </div>
+    </div>
+
+    <div class="input-section">
+     <label for="solution-input" class="input-label">Enter the decoded message:</label>
+     <input type="text" id="solution-input" class="solution-input" placeholder="Type your answer here..." autocomplete="off">
+    </div>
+
+    <div class="button-group">
+     <button type="button" class="submit-button" id="check-button">Check Solution</button>
+     <button type="button" class="submit-button secondary" id="hint-button">Request Hint</button>
+     <button type="button" class="submit-button secondary" id="reveal-button">Reveal Solution</button>
+    </div>
+
+    <div class="hint-container" id="hint-container">
+     <div class="hint-title">Hint from the Manor's Ghost:</div>
+     <div id="hint-text">Each letter has been shifted by the same amount. Think of Caesar's ancient method...</div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+   </main>
+
+   <div class="success-animation" id="success-animation"></div>
+  </div>
+
+  <script>
+        const defaultConfig = {
+            puzzle_title: "The Manor Cipher",
+            manor_name: "Mistletoe Manor",
+            hint_button_text: "Request Hint",
+            reveal_button_text: "Reveal Solution"
+        };
+
+        const puzzleData = {
+            cipherText: "WKHL FKULVWPDV WUHDVXUH LV KLGGHQ EHQHDWK WKH DQFLHQW RDN",
+            solution: "THE CHRISTMAS TREASURE IS HIDDEN BENEATH THE ANCIENT OAK",
+            hints: [
+                "Each letter has been shifted by the same amount. Think of Caesar's ancient method...",
+                "Try shifting each letter back by 3 positions in the alphabet. A becomes X, B becomes Y, C becomes Z...",
+                "This is a Caesar cipher with a shift of 3. W→T, K→H, H→E. The first word is 'THE'."
+            ],
+            currentHint: 0,
+            attempts: 0,
+            solved: false
+        };
+
+        function updateProgress() {
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            let progress = 0;
+            if (puzzleData.attempts > 0) progress += 25;
+            if (puzzleData.currentHint > 0) progress += 25;
+            if (puzzleData.currentHint > 1) progress += 25;
+            if (puzzleData.solved) progress = 100;
+            
+            progressFill.style.width = progress + '%';
+            progressText.textContent = `Mystery Progress: ${progress}% Complete`;
+        }
+
+        function checkSolution() {
+            const input = document.getElementById('solution-input');
+            const userSolution = input.value.trim().toUpperCase();
+            const feedback = document.getElementById('feedback');
+            
+            puzzleData.attempts++;
+            
+            if (userSolution === puzzleData.solution) {
+                puzzleData.solved = true;
+                showFeedback('🎄 Congratulations! You\'ve solved the Manor Cipher! The Christmas treasure awaits beneath the ancient oak in the manor\'s garden. Well done, detective! 🎄', 'success');
+                input.style.borderColor = '#22c55e';
+                input.disabled = true;
+                document.getElementById('check-button').disabled = true;
+                document.getElementById('hint-button').disabled = true;
+                createSuccessAnimation();
+            } else {
+                input.style.animation = 'shake 0.5s ease-in-out';
+                input.style.borderColor = '#ef4444';
+                showFeedback('Not quite right. Try again, detective! 🕵️', 'error');
+                setTimeout(() => {
+                    input.style.animation = '';
+                    input.style.borderColor = '';
+                }, 500);
+            }
+            
+            updateProgress();
+        }
+
+        function showHint() {
+            const hintContainer = document.getElementById('hint-container');
+            const hintText = document.getElementById('hint-text');
+            
+            if (puzzleData.currentHint < puzzleData.hints.length) {
+                hintText.textContent = puzzleData.hints[puzzleData.currentHint];
+                hintContainer.classList.add('show');
+                puzzleData.currentHint++;
+                updateProgress();
+            }
+        }
+
+        function revealSolution() {
+            const input = document.getElementById('solution-input');
+            input.value = puzzleData.solution;
+            puzzleData.solved = true;
+            showFeedback('🎄 Congratulations! You\'ve solved the Manor Cipher! The Christmas treasure awaits beneath the ancient oak in the manor\'s garden. Well done, detective! 🎄', 'success');
+            input.style.borderColor = '#22c55e';
+            input.disabled = true;
+            document.getElementById('check-button').disabled = true;
+            document.getElementById('hint-button').disabled = true;
+            createSuccessAnimation();
+            updateProgress();
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            feedback.offsetHeight;
+            feedback.classList.add('show');
+            
+            if (type === 'error') {
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('success-animation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    animation.appendChild(particle);
+                    setTimeout(() => particle.remove(), 2000);
+                }, i * 50);
+            }
+        }
+
+        document.getElementById('check-button').addEventListener('click', checkSolution);
+        document.getElementById('hint-button').addEventListener('click', showHint);
+        document.getElementById('reveal-button').addEventListener('click', revealSolution);
+        
+        document.getElementById('solution-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !puzzleData.solved) {
+                checkSolution();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            document.getElementById('solution-input').focus();
+        });
+    </script>
+ </body>
+</html>

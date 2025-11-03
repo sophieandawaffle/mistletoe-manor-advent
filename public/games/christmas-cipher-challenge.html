@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christmas Cipher Challenge</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .welcome-section {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-text {
+            font-size: 1.125rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .progress-container {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            height: 24px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 0.75rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .puzzles-section {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .key-section {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(251, 191, 36, 0.3);
+            padding-bottom: 0.75rem;
+        }
+
+        .puzzle {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .puzzle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .puzzle-title {
+            font-size: 1.25rem;
+            color: #f8fafc;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .difficulty {
+            padding: 0.375rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .difficulty.easy {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .difficulty.medium {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .difficulty.hard {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .cipher-type {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-bottom: 0.75rem;
+        }
+
+        .cipher-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1.125rem;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #dc2626;
+            margin: 1rem 0;
+            letter-spacing: 2px;
+            color: #fbbf24;
+            word-break: break-word;
+        }
+
+        .answer-row {
+            display: flex;
+            gap: 0.75rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .answer-input {
+            flex: 1;
+            min-width: 250px;
+            font-size: 1rem;
+        }
+
+        .check-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .check-btn:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+
+        .hint-btn {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #1e293b;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .hint-btn:hover {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(251, 191, 36, 0.3);
+        }
+
+        .result-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .result-message.correct {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #4ade80;
+        }
+
+        .result-message.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #f87171;
+        }
+
+        .hint {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            display: none;
+            line-height: 1.6;
+        }
+
+        .hint.visible {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .key-item {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .key-title {
+            font-size: 1rem;
+            color: #fbbf24;
+            margin: 0 0 0.5rem 0;
+            font-weight: 700;
+        }
+
+        .key-description {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin: 0;
+            color: #cbd5e1;
+        }
+
+        .alphabet-grid {
+            display: grid;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 0.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            margin: 0.75rem 0;
+        }
+
+        .alphabet-cell {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 0.375rem;
+            text-align: center;
+            border-radius: 0.25rem;
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .completion-message {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .completion-message.visible {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .completion-title {
+            font-size: 2rem;
+            color: #22c55e;
+            margin: 0 0 1rem 0;
+            font-weight: 700;
+        }
+
+        .completion-text {
+            font-size: 1.125rem;
+            margin: 0;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .key-section {
+                position: static;
+                max-height: none;
+            }
+
+            .answer-row {
+                flex-direction: column;
+            }
+
+            .answer-input {
+                min-width: auto;
+            }
+
+            .check-btn,
+            .hint-btn {
+                width: 100%;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 18</div>
+    <h1 class="puzzle-title" id="gameTitle">Christmas Cipher Challenge</h1>
+    <p class="mystery-subtitle">Decode the Christmas mysteries hidden in these festive ciphers!</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 1200px; width: 100%;">
+    <div class="welcome-section">
+     <p class="welcome-text" id="welcomeMessage">Decode the Christmas mysteries hidden in these festive ciphers!</p>
+    </div>
+
+    <div class="progress-container">
+     <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="main-content">
+     <div class="puzzles-section">
+      <h2 class="section-title">🎄 Christmas Puzzles</h2>
+      
+      <div class="puzzle" data-puzzle="1">
+       <div class="puzzle-header">
+        <h3 class="puzzle-title">1. Santa's Secret Message</h3>
+        <span class="difficulty easy">Easy</span>
+       </div>
+       <p class="cipher-type"><strong>Cipher Type:</strong> Caesar Cipher (Shift +3)</p>
+       <div class="cipher-text">PHUU FKULVWPDV DQG KDSSB QHZ BHDU</div>
+       <div class="answer-row">
+        <input type="text" class="solution-input answer-input" id="answer-1" placeholder="Enter your decoded message..." autocomplete="off">
+        <button class="submit-button check-btn" id="check-1">Check Answer</button>
+       </div>
+       <button class="hint-btn" id="hint-btn-1">Show Hint</button>
+       <div class="hint" id="hint-1"></div>
+       <div class="result-message" id="result-1"></div>
+      </div>
+
+      <div class="puzzle" data-puzzle="2">
+       <div class="puzzle-header">
+        <h3 class="puzzle-title">2. Elf Workshop Code</h3>
+        <span class="difficulty medium">Medium</span>
+       </div>
+       <p class="cipher-type"><strong>Cipher Type:</strong> Atbash Cipher</p>
+       <div class="cipher-text">GIVV DLIPH RH GSV NZTRX LU XSIRGHZNZH</div>
+       <div class="answer-row">
+        <input type="text" class="solution-input answer-input" id="answer-2" placeholder="Enter your decoded message..." autocomplete="off">
+        <button class="submit-button check-btn" id="check-2">Check Answer</button>
+       </div>
+       <button class="hint-btn" id="hint-btn-2">Show Hint</button>
+       <div class="hint" id="hint-2"></div>
+       <div class="result-message" id="result-2"></div>
+      </div>
+
+      <div class="puzzle" data-puzzle="3">
+       <div class="puzzle-header">
+        <h3 class="puzzle-title">3. Reindeer Navigation</h3>
+        <span class="difficulty easy">Easy</span>
+       </div>
+       <p class="cipher-type"><strong>Cipher Type:</strong> Reverse Text</p>
+       <div class="cipher-text">STHGIL SAMTSIRHC EHT WOLLOF</div>
+       <div class="answer-row">
+        <input type="text" class="solution-input answer-input" id="answer-3" placeholder="Enter your decoded message..." autocomplete="off">
+        <button class="submit-button check-btn" id="check-3">Check Answer</button>
+       </div>
+       <button class="hint-btn" id="hint-btn-3">Show Hint</button>
+       <div class="hint" id="hint-3"></div>
+       <div class="result-message" id="result-3"></div>
+      </div>
+
+      <div class="puzzle" data-puzzle="4">
+       <div class="puzzle-header">
+        <h3 class="puzzle-title">4. Mrs. Claus' Recipe</h3>
+        <span class="difficulty medium">Medium</span>
+       </div>
+       <p class="cipher-type"><strong>Cipher Type:</strong> ROT13</p>
+       <div class="cipher-text">TVATENOEERNQ PBBXVRF NER GUR ORFG</div>
+       <div class="answer-row">
+        <input type="text" class="solution-input answer-input" id="answer-4" placeholder="Enter your decoded message..." autocomplete="off">
+        <button class="submit-button check-btn" id="check-4">Check Answer</button>
+       </div>
+       <button class="hint-btn" id="hint-btn-4">Show Hint</button>
+       <div class="hint" id="hint-4"></div>
+       <div class="result-message" id="result-4"></div>
+      </div>
+
+      <div class="puzzle" data-puzzle="5">
+       <div class="puzzle-header">
+        <h3 class="puzzle-title">5. North Pole Coordinates</h3>
+        <span class="difficulty hard">Hard</span>
+       </div>
+       <p class="cipher-type"><strong>Cipher Type:</strong> Keyword Cipher (Keyword: SANTA)</p>
+       <div class="cipher-text">DFOOH JFQHK QK LZH KPFOQL BJ UZFKLESKK</div>
+       <div class="answer-row">
+        <input type="text" class="solution-input answer-input" id="answer-5" placeholder="Enter your decoded message..." autocomplete="off">
+        <button class="submit-button check-btn" id="check-5">Check Answer</button>
+       </div>
+       <button class="hint-btn" id="hint-btn-5">Show Hint</button>
+       <div class="hint" id="hint-5"></div>
+       <div class="result-message" id="result-5"></div>
+      </div>
+     </div>
+
+     <div class="key-section">
+      <h2 class="section-title">🔑 Cipher Key</h2>
+      
+      <div class="key-item">
+       <h4 class="key-title">Caesar Cipher</h4>
+       <p class="key-description">Each letter is shifted by a fixed number of positions in the alphabet. A shift of +3 means A→D, B→E, C→F, etc.</p>
+      </div>
+
+      <div class="key-item">
+       <h4 class="key-title">Atbash Cipher</h4>
+       <p class="key-description">Each letter is replaced by its mirror position: A↔Z, B↔Y, C↔X, etc.</p>
+      </div>
+
+      <div class="key-item">
+       <h4 class="key-title">Reverse Text</h4>
+       <p class="key-description">The entire message is written backwards. Read from right to left to decode.</p>
+      </div>
+
+      <div class="key-item">
+       <h4 class="key-title">ROT13</h4>
+       <p class="key-description">A special Caesar cipher with a shift of 13. Since there are 26 letters, applying ROT13 twice returns the original text.</p>
+      </div>
+
+      <div class="key-item">
+       <h4 class="key-title">Keyword Cipher</h4>
+       <p class="key-description">Uses a keyword to create a substitution alphabet. Remove duplicate letters from the keyword, then append remaining alphabet letters.</p>
+      </div>
+     </div>
+    </div>
+
+    <div class="completion-message" id="completionMessage">
+     <h2 class="completion-title">🎉 Congratulations!</h2>
+     <p class="completion-text" id="completionText">You've successfully decoded all the Christmas ciphers! You're now an official North Pole cryptographer!</p>
+    </div>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        const answers = {
+            1: "MERRY CHRISTMAS AND HAPPY NEW YEAR",
+            2: "TEAM WORK IS THE MAGIC OF CHRISTMAS", 
+            3: "FOLLOW THE CHRISTMAS LIGHTS",
+            4: "GINGERBREAD COOKIES ARE THE BEST",
+            5: "SANTA LIVES IN THE SPIRIT OF CHRISTMAS"
+        };
+
+        const hints = {
+            1: "💡 Hint: Try shifting each letter back by 3 positions in the alphabet. P→M, H→E, etc.",
+            2: "💡 Hint: Replace each letter with its opposite in the alphabet. A becomes Z, B becomes Y, etc.",
+            3: "💡 Hint: Read the message backwards, from right to left.",
+            4: "💡 Hint: Shift each letter by 13 positions. This is like Caesar cipher but with half the alphabet.",
+            5: "💡 Hint: The keyword SANTA creates a new alphabet: SANTBCDEFGHIJKLMOPQRUVWXYZ. Map each cipher letter to normal alphabet."
+        };
+
+        let solvedPuzzles = new Set();
+
+        function checkAnswer(puzzleNum) {
+            const input = document.getElementById(`answer-${puzzleNum}`);
+            const result = document.getElementById(`result-${puzzleNum}`);
+            const userAnswer = input.value.trim().toUpperCase();
+            const correctAnswer = answers[puzzleNum];
+
+            if (userAnswer === correctAnswer) {
+                result.className = 'result-message correct';
+                result.textContent = '✅ Correct! Well done, cipher master!';
+                solvedPuzzles.add(puzzleNum);
+                updateProgress();
+                createSuccessAnimation();
+            } else {
+                result.className = 'result-message incorrect';
+                result.textContent = '❌ Not quite right. Try again or use a hint!';
+            }
+        }
+
+        function showHint(puzzleNum) {
+            const hint = document.getElementById(`hint-${puzzleNum}`);
+            if (hint) {
+                hint.textContent = hints[puzzleNum];
+                hint.classList.add('visible');
+            }
+        }
+
+        function updateProgress() {
+            const progressFill = document.getElementById('progressFill');
+            const completionMessage = document.getElementById('completionMessage');
+            const progress = (solvedPuzzles.size / 5) * 100;
+            
+            progressFill.style.width = `${progress}%`;
+            
+            if (solvedPuzzles.size === 5) {
+                completionMessage.classList.add('visible');
+                completionMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                createSuccessAnimation();
+            }
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add event listeners for check buttons
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`check-${i}`).addEventListener('click', () => checkAnswer(i));
+                document.getElementById(`hint-btn-${i}`).addEventListener('click', () => showHint(i));
+                document.getElementById(`answer-${i}`).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        checkAnswer(i);
+                    }
+                });
+            }
+        });
+    </script>
+ </body>
+</html>
+

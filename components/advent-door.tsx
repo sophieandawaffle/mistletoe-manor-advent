@@ -19,9 +19,10 @@ interface AdventDoorProps {
   doorImageUrl: string
   onClick: () => void
   isMobile: boolean
+  calendarId?: string
 }
 
-export function AdventDoor({ day, isUnlocked, isOpened, position, doorImageUrl, onClick, isMobile }: AdventDoorProps) {
+export function AdventDoor({ day, isUnlocked, isOpened, position, doorImageUrl, onClick, isMobile, calendarId }: AdventDoorProps) {
   if (isMobile) {
     // Mobile grid layout - same visual style as desktop
     return (

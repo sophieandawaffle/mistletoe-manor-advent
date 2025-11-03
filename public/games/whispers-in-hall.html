@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whispers in the Hall - Victorian Mystery</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .clues-section {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-left: 4px solid #fbbf24;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .clue {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 3px solid #3b82f6;
+            transition: all 0.3s ease;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .clue:hover {
+            background: rgba(30, 41, 59, 0.8);
+            transform: translateX(5px);
+        }
+
+        .clue-number {
+            color: #3b82f6;
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+
+        .deduction-grid-section {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .grid-instructions {
+            margin-bottom: 1rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
+            font-style: italic;
+        }
+
+        .grid-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .grid-table th,
+        .grid-table td {
+            padding: 0.75rem;
+            text-align: center;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            font-size: 0.875rem;
+        }
+
+        .grid-table th {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            font-weight: 700;
+        }
+
+        .grid-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: #cbd5e1;
+            background: rgba(30, 41, 59, 0.4);
+        }
+
+        .grid-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+            background: rgba(30, 41, 59, 0.6);
+            color: transparent;
+        }
+
+        .grid-cell.empty {
+            background: rgba(30, 41, 59, 0.6);
+            color: transparent;
+        }
+
+        .grid-cell.check {
+            background: rgba(34, 197, 94, 0.3);
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+
+        .grid-cell.cross {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .grid-cell:hover {
+            transform: scale(1.1);
+            border-color: #fbbf24;
+        }
+
+        .solution-area {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .solution-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .solution-input {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .solution-input label {
+            color: #fbbf24;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .solution-input select {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            background: rgba(15, 23, 42, 0.8);
+            color: #f8fafc;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .solution-input select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .solution-input select option {
+            background: #1e293b;
+            color: #f8fafc;
+        }
+
+        .check-solution-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .check-solution-btn:hover {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+        }
+
+        .result-message {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .result-message.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid #22c55e;
+            color: #4ade80;
+        }
+
+        .result-message.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            color: #f87171;
+        }
+
+        .result-message.hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .solution-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-table {
+                font-size: 0.75rem;
+            }
+
+            .grid-table th,
+            .grid-table td {
+                padding: 0.5rem;
+            }
+
+            .grid-cell {
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
+            }
+
+            .clue {
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid-table {
+                font-size: 0.7rem;
+            }
+
+            .grid-table th,
+            .grid-table td {
+                padding: 0.375rem;
+            }
+
+            .grid-cell {
+                width: 25px;
+                height: 25px;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 4</div>
+    <h1 class="puzzle-title" id="puzzle-title">Whispers in the Hall</h1>
+    <p class="mystery-subtitle">A Victorian Christmas Eve Mystery at <span id="manor-name">Mistletoe Manor</span></p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 1000px; width: 100%;">
+    <div class="game-layout">
+     <!-- Clues Section -->
+     <section class="clues-section">
+      <h2 class="section-title">🔍 Case Clues</h2>
+      <div id="clues-container"></div>
+     </section>
+
+     <!-- Deduction Grid Section -->
+     <section class="deduction-grid-section">
+      <h2 class="section-title">📋 Deduction Grid</h2>
+      <p class="grid-instructions">Click cells: Empty → ✓ → ✗ → Empty</p>
+      <table class="grid-table" id="grid-table">
+       <thead>
+        <tr>
+         <th>Person/Item</th>
+         <th>Lady Pemberton</th>
+         <th>Lord Ashworth</th>
+         <th>Miss Fairfax</th>
+        </tr>
+       </thead>
+       <tbody id="grid-body">
+        <!-- Grid rows will be generated by JavaScript -->
+       </tbody>
+      </table>
+     </section>
+    </div>
+
+    <!-- Solution Area -->
+    <section class="solution-area">
+     <h2 class="section-title">🎯 Your Solution</h2>
+     <div class="solution-inputs">
+      <div class="solution-input">
+       <label for="pembertonRoom">Where was Lady Pemberton?</label>
+       <select id="pembertonRoom">
+        <option value="">Select...</option>
+        <option value="library">Library</option>
+        <option value="ballroom">Ballroom</option>
+        <option value="conservatory">Conservatory</option>
+       </select>
+      </div>
+      <div class="solution-input">
+       <label for="ashworthRoom">Where was Lord Ashworth?</label>
+       <select id="ashworthRoom">
+        <option value="">Select...</option>
+        <option value="library">Library</option>
+        <option value="ballroom">Ballroom</option>
+        <option value="conservatory">Conservatory</option>
+       </select>
+      </div>
+      <div class="solution-input">
+       <label for="fairfaxRoom">Where was Miss Fairfax?</label>
+       <select id="fairfaxRoom">
+        <option value="">Select...</option>
+        <option value="library">Library</option>
+        <option value="ballroom">Ballroom</option>
+        <option value="conservatory">Conservatory</option>
+       </select>
+      </div>
+      <div class="solution-input">
+       <label for="pembertonObject">What did Lady Pemberton have?</label>
+       <select id="pembertonObject">
+        <option value="">Select...</option>
+        <option value="golden-locket">Golden Locket</option>
+        <option value="silver-candlestick">Silver Candlestick</option>
+        <option value="ruby-ring">Ruby Ring</option>
+       </select>
+      </div>
+      <div class="solution-input">
+       <label for="ashworthObject">What did Lord Ashworth have?</label>
+       <select id="ashworthObject">
+        <option value="">Select...</option>
+        <option value="golden-locket">Golden Locket</option>
+        <option value="silver-candlestick">Silver Candlestick</option>
+        <option value="ruby-ring">Ruby Ring</option>
+       </select>
+      </div>
+      <div class="solution-input">
+       <label for="fairfaxObject">What did Miss Fairfax have?</label>
+       <select id="fairfaxObject">
+        <option value="">Select...</option>
+        <option value="golden-locket">Golden Locket</option>
+        <option value="silver-candlestick">Silver Candlestick</option>
+        <option value="ruby-ring">Ruby Ring</option>
+       </select>
+      </div>
+     </div>
+     <button class="check-solution-btn" id="checkSolutionBtn">🔍 Check Solution</button>
+     <div id="resultMessage" class="result-message hidden"></div>
+    </section>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        // Game data
+        const gameData = {
+            guests: ['Lady Pemberton', 'Lord Ashworth', 'Miss Fairfax'],
+            rooms: ['Library', 'Ballroom', 'Conservatory'],
+            objects: ['Golden Locket', 'Silver Candlestick', 'Ruby Ring'],
+            solution: {
+                'Lady Pemberton': { room: 'Library', object: 'Golden Locket' },
+                'Lord Ashworth': { room: 'Ballroom', object: 'Silver Candlestick' },
+                'Miss Fairfax': { room: 'Conservatory', object: 'Ruby Ring' }
+            },
+            clues: [
+                "Lady Pemberton was not in the Ballroom at midnight.",
+                "The person in the Library had the Golden Locket.",
+                "Lord Ashworth was seen with a silver item.",
+                "Miss Fairfax loves plants and flowers.",
+                "The Ruby Ring was not in the Library.",
+                "Lady Pemberton enjoys reading late into the evening."
+            ]
+        };
+
+        // Grid state management
+        const gridState = {};
+
+        // Initialize the game
+        function initializeGame() {
+            createGrid();
+            displayClues();
+        }
+
+        function createGrid() {
+            const tbody = document.getElementById('grid-body');
+            if (!tbody) {
+                console.error('Grid body not found!');
+                return;
+            }
+            
+            // Clear existing content
+            tbody.innerHTML = '';
+            
+            // Create rows for Rooms
+            gameData.rooms.forEach(room => {
+                const row = createGridRow(room);
+                tbody.appendChild(row);
+            });
+            
+            // Create rows for Objects
+            gameData.objects.forEach(object => {
+                const row = createGridRow(object);
+                tbody.appendChild(row);
+            });
+        }
+
+        function createGridRow(itemName) {
+            const row = document.createElement('tr');
+            
+            // First cell: item name
+            const nameCell = document.createElement('td');
+            nameCell.innerHTML = `<strong>${itemName}</strong>`;
+            row.appendChild(nameCell);
+            
+            // Create cells for each guest
+            gameData.guests.forEach(guest => {
+                const cell = document.createElement('td');
+                const button = document.createElement('button');
+                button.className = 'grid-cell empty';
+                const key = `${itemName.toLowerCase()}-${guest.toLowerCase()}`;
+                button.dataset.row = itemName.toLowerCase();
+                button.dataset.col = guest.toLowerCase();
+                button.dataset.key = key;
+                
+                gridState[key] = 'empty';
+                
+                button.addEventListener('click', () => {
+                    cycleGridCell(button, key);
+                });
+                
+                cell.appendChild(button);
+                row.appendChild(cell);
+            });
+            
+            return row;
+        }
+
+        function cycleGridCell(cell, key) {
+            const states = ['empty', 'check', 'cross'];
+            const currentIndex = states.indexOf(gridState[key]);
+            const nextIndex = (currentIndex + 1) % states.length;
+            const nextState = states[nextIndex];
+            
+            gridState[key] = nextState;
+            
+            // Update cell appearance
+            cell.className = `grid-cell ${nextState}`;
+            
+            // Update cell content
+            switch(nextState) {
+                case 'empty':
+                    cell.textContent = '';
+                    break;
+                case 'check':
+                    cell.textContent = '✓';
+                    break;
+                case 'cross':
+                    cell.textContent = '✗';
+                    break;
+            }
+        }
+
+        function displayClues() {
+            const container = document.getElementById('clues-container');
+            if (!container) {
+                console.error('Clues container not found!');
+                return;
+            }
+            
+            // Clear any existing content
+            container.innerHTML = '';
+            
+            gameData.clues.forEach((clue, index) => {
+                const clueElement = document.createElement('div');
+                clueElement.className = 'clue';
+                clueElement.innerHTML = `<span class="clue-number">${index + 1}.</span>${clue}`;
+                container.appendChild(clueElement);
+            });
+        }
+
+        function checkSolution() {
+            const pembertonRoom = document.getElementById('pembertonRoom').value;
+            const ashworthRoom = document.getElementById('ashworthRoom').value;
+            const fairfaxRoom = document.getElementById('fairfaxRoom').value;
+            const pembertonObject = document.getElementById('pembertonObject').value;
+            const ashworthObject = document.getElementById('ashworthObject').value;
+            const fairfaxObject = document.getElementById('fairfaxObject').value;
+            const resultDiv = document.getElementById('resultMessage');
+            
+            if (!pembertonRoom || !ashworthRoom || !fairfaxRoom || !pembertonObject || !ashworthObject || !fairfaxObject) {
+                resultDiv.className = 'result-message error';
+                resultDiv.textContent = '🚫 Please fill in all fields before checking your solution!';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+            
+            // Correct solution
+            const correctPembertonRoom = 'library';
+            const correctAshworthRoom = 'ballroom';
+            const correctFairfaxRoom = 'conservatory';
+            const correctPembertonObject = 'golden-locket';
+            const correctAshworthObject = 'silver-candlestick';
+            const correctFairfaxObject = 'ruby-ring';
+            
+            // Check if all answers are correct
+            const allCorrect = 
+                pembertonRoom === correctPembertonRoom &&
+                ashworthRoom === correctAshworthRoom &&
+                fairfaxRoom === correctFairfaxRoom &&
+                pembertonObject === correctPembertonObject &&
+                ashworthObject === correctAshworthObject &&
+                fairfaxObject === correctFairfaxObject;
+            
+            if (allCorrect) {
+                resultDiv.className = 'result-message success';
+                resultDiv.textContent = '🎉 Excellent detective work! You solved the mystery correctly. Lady Pemberton was in the Library with the Golden Locket, Lord Ashworth was in the Ballroom with the Silver Candlestick, and Miss Fairfax was in the Conservatory with the Ruby Ring!';
+                resultDiv.classList.remove('hidden');
+                createSuccessAnimation();
+            } else {
+                let feedback = '🔍 Not quite right. ';
+                if (pembertonRoom !== correctPembertonRoom) feedback += 'Lady Pemberton\'s location is incorrect. ';
+                if (ashworthRoom !== correctAshworthRoom) feedback += 'Lord Ashworth\'s location is incorrect. ';
+                if (fairfaxRoom !== correctFairfaxRoom) feedback += 'Miss Fairfax\'s location is incorrect. ';
+                if (pembertonObject !== correctPembertonObject) feedback += 'Lady Pemberton\'s object is incorrect. ';
+                if (ashworthObject !== correctAshworthObject) feedback += 'Lord Ashworth\'s object is incorrect. ';
+                if (fairfaxObject !== correctFairfaxObject) feedback += 'Miss Fairfax\'s object is incorrect. ';
+                feedback += 'Review the clues and try again!';
+                
+                resultDiv.className = 'result-message error';
+                resultDiv.textContent = feedback;
+                resultDiv.classList.remove('hidden');
+            }
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('checkSolutionBtn').addEventListener('click', checkSolution);
+            initializeGame();
+        });
+    </script>
+ </body>
+</html>

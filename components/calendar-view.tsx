@@ -137,7 +137,11 @@ export function CalendarView({ calendar, orderId }: CalendarViewProps) {
       </div>
 
       {showUnlockConfirmation && (
-        <UnlockConfirmationModal onConfirm={confirmUnlockAll} onClose={() => setShowUnlockConfirmation(false)} />
+        <UnlockConfirmationModal 
+          onConfirm={confirmUnlockAll} 
+          onClose={() => setShowUnlockConfirmation(false)}
+          calendarId={calendar.id}
+        />
       )}
     </main>
   )

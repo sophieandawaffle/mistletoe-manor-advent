@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spot the Difference</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .image-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .image-container {
+            position: relative;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            cursor: pointer;
+            line-height: 0;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .difference-marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #fbbf24;
+            border-radius: 50%;
+            background: rgba(251, 191, 36, 0.3);
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .image-comparison {
+                grid-template-columns: 1fr;
+                justify-items: center;
+                gap: 1rem;
+            }
+            
+            .image-container {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .difference-marker {
+                width: 35px;
+                height: 35px;
+                border-width: 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .image-comparison {
+                gap: 0.75rem;
+            }
+
+            .difference-marker {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 9</div>
+    <h1 class="puzzle-title" id="gameTitle">Spot the Difference</h1>
+    <p class="mystery-subtitle">Find all the differences between these two images!</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <div style="margin-bottom: 1.5rem; text-align: center;">
+     <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem;" id="progressText">Found: 0 / 6 differences</div>
+     <div style="width: 100%; height: 8px; background: rgba(15, 23, 42, 0.6); border-radius: 4px; overflow: hidden;">
+      <div style="height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); width: 0%; transition: width 0.3s ease;" id="progressFill"></div>
+     </div>
+    </div>
+
+    <div class="image-comparison">
+     <div class="image-container" id="imageContainer1">
+      <img src="/images/left_image.jpg" alt="Left Image" id="image1">
+     </div>
+     <div class="image-container" id="imageContainer2">
+      <img src="/images/right_image.png" alt="Right Image" id="image2">
+     </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 1.5rem;">
+     <button class="submit-button secondary" id="hintBtn">💡 Show Hint</button>
+    </div>
+
+    <div class="feedback" id="hintMessage"></div>
+
+    <div class="feedback success" id="successMessage" style="display: none; margin-top: 1.5rem;">
+     🎄 Congratulations! You found all the differences! 🎄
+    </div>
+   </main>
+  </div>
+  <script>
+        // Configuration - Spot the Difference Game
+        // Calibrated coordinates from user clicks
+        const gameConfig = {
+            image1: '/images/left_image.jpg',  // Left image (original)
+            image2: '/images/right_image.png',  // Right image (with differences)
+            differences: [
+                // 1. Difference at 23.27%, 61.68%
+                { x: 23.27, y: 61.68, radius: 40, sourceWidth: 1200, sourceHeight: 1200 },
+                // 2. Difference at 50.00%, 89.56%
+                { x: 50.00, y: 89.56, radius: 40, sourceWidth: 1200, sourceHeight: 1200 },
+                // 3. Difference at 34.10%, 45.78%
+                { x: 34.10, y: 45.78, radius: 40, sourceWidth: 1200, sourceHeight: 1200 },
+                // 4. Difference at 48.39%, 28.96%
+                { x: 48.39, y: 28.96, radius: 40, sourceWidth: 1200, sourceHeight: 1200 },
+                // 5. Difference at 68.89%, 34.26%
+                { x: 68.89, y: 34.26, radius: 40, sourceWidth: 1200, sourceHeight: 1200 },
+                // 6. Difference at 30.65%, 86.34%
+                { x: 30.65, y: 86.34, radius: 40, sourceWidth: 1200, sourceHeight: 1200 }
+            ]
+        };
+        
+        // Actual image dimensions (will be set when images load for scaling)
+        let sourceImageWidth = 0;
+        let sourceImageHeight = 0;
+
+        let foundDifferences = new Set();
+        let image1Width = 0;
+        let image1Height = 0;
+        let image2Width = 0;
+        let image2Height = 0;
+        
+        // Calibration mode
+        let calibrationMode = false;
+        let calibrationData = [];
+        let calibrationCurrentIndex = 0;
+        let sourceImgWidthForCalibration = 0;
+        let sourceImgHeightForCalibration = 0;
+
+        // Convert pixel coordinates to displayed coordinates (stored as percentage for responsive scaling)
+        function convertPixelToPercentage(pixelDiff, sourceWidth, sourceHeight) {
+            const centerX = pixelDiff.x + (pixelDiff.width / 2);
+            const centerY = pixelDiff.y + (pixelDiff.height / 2);
+            // Store radius in source pixels - we'll scale it when checking clicks
+            const radius = Math.max(pixelDiff.width, pixelDiff.height) / 2 * 3.0; // 3x for easier clicking
+            
+            const result = {
+                x: (centerX / sourceWidth) * 100,  // Percentage of source image
+                y: (centerY / sourceHeight) * 100, // Percentage of source image
+                radius: radius, // In source pixels
+                sourceWidth: sourceWidth,
+                sourceHeight: sourceHeight
+            };
+            
+            console.log('Converted difference:', {
+                pixel: { x: pixelDiff.x, y: pixelDiff.y, width: pixelDiff.width, height: pixelDiff.height },
+                converted: result
+            });
+            
+            return result;
+        }
+        
+        // Calculate if click is within difference area
+        function isWithinDifference(x, y, diff, displayedImgWidth, displayedImgHeight) {
+            // Convert percentage to displayed pixels
+            const diffX = (diff.x / 100) * displayedImgWidth;
+            const diffY = (diff.y / 100) * displayedImgHeight;
+            
+            // Calculate scale factor from source to displayed
+            const scaleX = displayedImgWidth / diff.sourceWidth;
+            const scaleY = displayedImgHeight / diff.sourceHeight;
+            const scale = (scaleX + scaleY) / 2; // Average scale
+            const scaledRadius = diff.radius * scale;
+            
+            const distance = Math.sqrt(Math.pow(x - diffX, 2) + Math.pow(y - diffY, 2));
+            
+            return distance <= scaledRadius;
+        }
+
+        // Handle click on image
+        function handleImageClick(event, containerId) {
+            // Get the actual image element
+            const img = document.getElementById(containerId === 'imageContainer1' ? 'image1' : 'image2');
+            if (!img) {
+                console.log('Image not found');
+                return;
+            }
+            
+            const container = document.getElementById(containerId);
+            const containerRect = container.getBoundingClientRect();
+            
+            // Calculate actual displayed image bounds (accounting for object-fit: contain)
+            const naturalWidth = img.naturalWidth || img.width;
+            const naturalHeight = img.naturalHeight || img.height;
+            
+            // Use container dimensions, not image element dimensions
+            const containerWidth = containerRect.width;
+            const containerHeight = containerRect.height;
+            
+            // Calculate the actual image display area within the container
+            const imageAspect = naturalWidth / naturalHeight;
+            const containerAspect = containerWidth / containerHeight;
+            
+            let actualImgWidth, actualImgHeight, offsetX = 0, offsetY = 0;
+            
+            if (imageAspect > containerAspect) {
+                // Image is wider - it fits width, height is smaller
+                actualImgWidth = containerWidth;
+                actualImgHeight = containerWidth / imageAspect;
+                offsetY = (containerHeight - actualImgHeight) / 2;
+            } else {
+                // Image is taller - it fits height, width is smaller
+                actualImgHeight = containerHeight;
+                actualImgWidth = containerHeight * imageAspect;
+                offsetX = (containerWidth - actualImgWidth) / 2;
+            }
+            
+            // Get click position relative to the container
+            const clickX = event.clientX - containerRect.left;
+            const clickY = event.clientY - containerRect.top;
+            
+            // Adjust for image offset
+            const relativeX = clickX - offsetX;
+            const relativeY = clickY - offsetY;
+            
+            // Check if click is within actual image area
+            if (relativeX < 0 || relativeY < 0 || relativeX > actualImgWidth || relativeY > actualImgHeight) {
+                return;
+            }
+            
+            // Handle calibration mode
+            if (calibrationMode) {
+                handleCalibrationClick(relativeX, relativeY, actualImgWidth, actualImgHeight, containerId);
+                return;
+            }
+            
+            // Normal game mode
+            // Don't process if differences haven't been initialized yet
+            if (gameConfig.differences.length === 0 || sourceImageWidth === 0 || sourceImageHeight === 0) {
+                console.log('Differences not yet initialized');
+                return;
+            }
+
+            // Check each difference
+            let foundAny = false;
+            gameConfig.differences.forEach((diff, index) => {
+                if (!foundDifferences.has(index)) {
+                    const isWithin = isWithinDifference(relativeX, relativeY, diff, actualImgWidth, actualImgHeight);
+                    if (isWithin) {
+                        console.log('✅ Found difference at index:', index, 'at click position:', { clickX, clickY, relativeX, relativeY });
+                        foundDifferences.add(index);
+                        // Use the actual click position for marker placement (more accurate)
+                        markDifferenceAtPosition(containerId, diff, index, clickX, clickY);
+                        updateProgress();
+                        foundAny = true;
+                    }
+                }
+            });
+        }
+        
+        // Handle calibration click
+        function handleCalibrationClick(x, y, displayedWidth, displayedHeight, containerId) {
+            // Convert displayed coordinates to percentage (relative to actual image area)
+            const percentX = (x / displayedWidth) * 100;
+            const percentY = (y / displayedHeight) * 100;
+            
+            // Get the image element to calculate offset
+            const img = document.getElementById(containerId === 'imageContainer1' ? 'image1' : 'image2');
+            const container = document.getElementById(containerId);
+            const containerRect = container.getBoundingClientRect();
+            const imgRect = img.getBoundingClientRect();
+            
+            // Calculate offset (where image actually starts in container)
+            const naturalWidth = img.naturalWidth || img.width;
+            const naturalHeight = img.naturalHeight || img.height;
+            const imageAspect = naturalWidth / naturalHeight;
+            const containerAspect = imgRect.width / imgRect.height;
+            
+            let offsetX = 0, offsetY = 0;
+            if (imageAspect > containerAspect) {
+                offsetY = (imgRect.height - displayedHeight) / 2;
+            } else {
+                offsetX = (imgRect.width - displayedWidth) / 2;
+            }
+            
+            // Calculate absolute position for marker (relative to container)
+            const absoluteX = offsetX + x;
+            const absoluteY = offsetY + y;
+            
+            // Store calibration data
+            const calibrationPoint = {
+                index: calibrationCurrentIndex + 1,
+                displayedX: x,
+                displayedY: y,
+                displayedWidth: displayedWidth,
+                displayedHeight: displayedHeight,
+                percentX: percentX,
+                percentY: percentY,
+                sourceWidth: sourceImgWidthForCalibration || displayedWidth,
+                sourceHeight: sourceImgHeightForCalibration || displayedHeight
+            };
+            
+            calibrationData.push(calibrationPoint);
+            
+            // Show marker where clicked (at absolute position in container)
+            const marker = document.createElement('div');
+            marker.style.position = 'absolute';
+            marker.style.left = absoluteX + 'px';
+            marker.style.top = absoluteY + 'px';
+            marker.style.width = '30px';
+            marker.style.height = '30px';
+            marker.style.border = '3px solid #228B22';
+            marker.style.borderRadius = '50%';
+            marker.style.background = 'rgba(34, 139, 34, 0.2)';
+            marker.style.transform = 'translate(-50%, -50%)';
+            marker.style.pointerEvents = 'none';
+            marker.style.zIndex = '100';
+            container.appendChild(marker);
+            
+            console.log(`✅ Calibration point ${calibrationCurrentIndex + 1} recorded:`, calibrationPoint);
+            console.log(`   Coordinates: ${calibrationPoint.percentX.toFixed(2)}%, ${calibrationPoint.percentY.toFixed(2)}%`);
+            console.log(`   Displayed: (${calibrationPoint.displayedX.toFixed(1)}, ${calibrationPoint.displayedY.toFixed(1)})`);
+            console.log(`   Source dimensions: ${calibrationPoint.sourceWidth} x ${calibrationPoint.sourceHeight}`);
+            
+            calibrationCurrentIndex++;
+            
+            // Update UI elements if they exist
+            const currentEl = document.getElementById('calibrationCurrent');
+            const statusEl = document.getElementById('calibrationStatus');
+            const resultsEl = document.getElementById('calibrationResults');
+            
+            if (currentEl) {
+                currentEl.textContent = calibrationCurrentIndex + 1;
+            }
+            if (statusEl) {
+                if (calibrationCurrentIndex >= 6) {
+                    statusEl.textContent = `Recorded ${calibrationCurrentIndex} of 6 - Processing...`;
+                    setTimeout(() => {
+                        finishCalibration();
+                    }, 500);
+                } else {
+                    statusEl.textContent = `Recorded ${calibrationCurrentIndex} of 6 - Click on difference ${calibrationCurrentIndex + 1}`;
+                }
+            }
+            
+            // Update results display in real-time
+            if (resultsEl) {
+                resultsEl.style.display = 'block';
+                let resultsHTML = '<div style="font-weight: 600; margin-bottom: 0.5rem; color: #f8fafc;">Recorded Points:</div>';
+                calibrationData.forEach((point, idx) => {
+                    resultsHTML += `<div style="margin-bottom: 0.25rem; color: #cbd5e1;">${idx + 1}. x: ${point.percentX.toFixed(2)}%, y: ${point.percentY.toFixed(2)}%</div>`;
+                });
+                resultsEl.innerHTML = resultsHTML;
+            }
+        }
+        
+        // Start calibration mode
+        function startCalibration() {
+            // Clear any existing markers first
+            resetCalibration();
+            
+            calibrationMode = true;
+            calibrationData = [];
+            calibrationCurrentIndex = 0;
+            
+            const img1 = document.getElementById('image1');
+            sourceImgWidthForCalibration = img1.naturalWidth || img1.width || img1.clientWidth;
+            sourceImgHeightForCalibration = img1.naturalHeight || img1.height || img1.clientHeight;
+            
+            const modeEl = document.getElementById('calibrationMode');
+            const totalEl = document.getElementById('calibrationTotal');
+            const currentEl = document.getElementById('calibrationCurrent');
+            const instructionsEl = document.getElementById('calibrationInstructions');
+            const statusEl = document.getElementById('calibrationStatus');
+            const finishBtn = document.getElementById('finishCalibrationBtn');
+            const resultsEl = document.getElementById('calibrationResults');
+            
+            if (modeEl) modeEl.style.display = 'block';
+            if (totalEl) totalEl.textContent = '6';
+            if (currentEl) currentEl.textContent = '1';
+            if (instructionsEl) instructionsEl.textContent = 'Click on each of the 6 differences in the images (either image is fine)';
+            if (statusEl) statusEl.textContent = 'Click on difference 1 of 6';
+            if (finishBtn) finishBtn.style.display = 'none';
+            if (resultsEl) {
+                resultsEl.style.display = 'none';
+                resultsEl.innerHTML = '';
+            }
+            
+            console.log('\n========================================');
+            console.log('=== CALIBRATION MODE STARTED ===');
+            console.log('========================================');
+            console.log('Source image dimensions:', sourceImgWidthForCalibration, 'x', sourceImgHeightForCalibration);
+            console.log('Click on each of the 6 differences. You can click on either image.');
+            console.log('Each click will log coordinates to the console.');
+            console.log('========================================\n');
+        }
+        
+        // Finish calibration and output results
+        function finishCalibration() {
+            if (calibrationData.length === 0) {
+                alert('No calibration points recorded. Please click on at least one difference.');
+                return;
+            }
+            
+            calibrationMode = false;
+            
+            // Use only the first 6 points if more were recorded
+            const finalData = calibrationData.slice(0, 6);
+            
+            const instructionsEl = document.getElementById('calibrationInstructions');
+            const statusEl = document.getElementById('calibrationStatus');
+            const finishBtn = document.getElementById('finishCalibrationBtn');
+            const resultsEl = document.getElementById('calibrationResults');
+            
+            if (instructionsEl) {
+                instructionsEl.textContent = '✅ Calibration Complete! Check results below and console.';
+            }
+            
+            // Generate the differences array for copy-paste (matching the current format)
+            const differencesCode = finalData.map((point, idx) => {
+                return `                // ${idx + 1}. Difference at ${point.percentX.toFixed(2)}%, ${point.percentY.toFixed(2)}%\n                { x: ${point.percentX.toFixed(2)}, y: ${point.percentY.toFixed(2)}, radius: 40, sourceWidth: ${point.sourceWidth}, sourceHeight: ${point.sourceHeight} }`;
+            }).join(',\n');
+            
+            const fullCode = `            differences: [\n${differencesCode}\n            ]`;
+            
+            console.log('\n========================================');
+            console.log('=== CALIBRATION DATA - COPY THIS ===');
+            console.log('========================================\n');
+            console.log(fullCode);
+            console.log('\n========================================');
+            console.log('=== INDIVIDUAL DIFFERENCES ===');
+            console.log('========================================');
+            finalData.forEach((point, idx) => {
+                console.log(`${idx + 1}. x: ${point.percentX.toFixed(2)}%, y: ${point.percentY.toFixed(2)}%`);
+                console.log(`   Displayed: (${point.displayedX.toFixed(1)}, ${point.displayedY.toFixed(1)})`);
+                console.log(`   Source: ${point.sourceWidth} x ${point.sourceHeight}`);
+            });
+            console.log('\n========================================');
+            console.log('Replace the differences array in gameConfig with the code above.');
+            console.log('========================================\n');
+            
+            if (statusEl) {
+                statusEl.textContent = '✅ Check browser console (F12) and results below!';
+            }
+            if (finishBtn) {
+                finishBtn.style.display = 'inline-block';
+                finishBtn.textContent = 'Show Again';
+            }
+            
+            // Update results display with full code
+            if (resultsEl) {
+                resultsEl.style.display = 'block';
+                let resultsHTML = '<div style="font-weight: 600; margin-bottom: 0.75rem; color: #f8fafc;">✅ Calibration Results:</div>';
+                resultsHTML += '<div style="margin-bottom: 0.5rem; color: #94a3b8; font-size: 0.75rem;">Click to copy code below, then check browser console (F12) for full details:</div>';
+                resultsHTML += '<div style="background: rgba(0, 0, 0, 0.3); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.75rem; cursor: pointer;" onclick="copyCalibrationCode()" title="Click to copy">';
+                resultsHTML += '<div style="color: #60a5fa; margin-bottom: 0.5rem;">Code to replace in gameConfig:</div>';
+                resultsHTML += '<div style="color: #cbd5e1; white-space: pre-wrap; font-size: 0.7rem;">' + fullCode.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+                resultsHTML += '</div>';
+                resultsHTML += '<div style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 0.5rem;">Points recorded:</div>';
+                finalData.forEach((point, idx) => {
+                    resultsHTML += `<div style="margin-bottom: 0.25rem; color: #cbd5e1;">${idx + 1}. x: ${point.percentX.toFixed(2)}%, y: ${point.percentY.toFixed(2)}%</div>`;
+                });
+                resultsEl.innerHTML = resultsHTML;
+            }
+            
+            // Store for copy function
+            window.calibrationCodeToCopy = fullCode;
+        }
+        
+        // Copy calibration code to clipboard
+        function copyCalibrationCode() {
+            if (window.calibrationCodeToCopy && navigator.clipboard) {
+                navigator.clipboard.writeText(window.calibrationCodeToCopy).then(() => {
+                    const statusEl = document.getElementById('calibrationStatus');
+                    if (statusEl) {
+                        statusEl.textContent = '✅ Code copied to clipboard!';
+                    }
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            }
+        }
+        
+        // Reset calibration
+        function resetCalibration() {
+            calibrationMode = false;
+            calibrationData = [];
+            calibrationCurrentIndex = 0;
+            window.calibrationCodeToCopy = null;
+            
+            const modeEl = document.getElementById('calibrationMode');
+            const resultsEl = document.getElementById('calibrationResults');
+            
+            if (modeEl) modeEl.style.display = 'none';
+            if (resultsEl) {
+                resultsEl.style.display = 'none';
+                resultsEl.innerHTML = '';
+            }
+            
+            // Remove all calibration markers (green circles)
+            const containers = ['imageContainer1', 'imageContainer2'];
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    const markers = container.querySelectorAll('div[style*="border: 3px solid #228B22"]');
+                    markers.forEach(marker => {
+                        if (marker.style.position === 'absolute' && marker.style.borderRadius === '50%') {
+                            marker.remove();
+                        }
+                    });
+                }
+            });
+        }
+
+        // Mark a difference as found at the exact click position
+        function markDifferenceAtPosition(containerId, diff, index, clickX, clickY) {
+            const container = document.getElementById(containerId);
+            const containerRect = container.getBoundingClientRect();
+            
+            // Convert click position (relative to container) to position for marker
+            // clickX and clickY are already relative to containerRect.left/top from the event handler
+            const x = clickX;
+            const y = clickY;
+
+            // Remove the clickable area
+            const area = container.querySelector(`[data-diff-index="${index}"]`);
+            if (area) {
+                area.classList.add('found');
+            }
+
+            // Add marker at the exact click position
+            const marker = document.createElement('div');
+            marker.className = 'difference-marker';
+            marker.style.position = 'absolute';
+            marker.style.left = x + 'px';
+            marker.style.top = y + 'px';
+            marker.style.transform = 'translate(-50%, -50%)'; // Center the marker on the point
+            container.appendChild(marker);
+        }
+        
+        // Legacy function for backward compatibility
+        function markDifference(containerId, diff, index, offsetX, offsetY, actualImgWidth, actualImgHeight) {
+            markDifferenceAtPosition(containerId, diff, index, offsetX + (diff.x / 100) * actualImgWidth, offsetY + (diff.y / 100) * actualImgHeight);
+        }
+
+        // Initialize differences based on source image dimensions
+        function initializeDifferences() {
+            const img1 = document.getElementById('image1');
+            const img2 = document.getElementById('image2');
+            
+            // Get natural (source) image dimensions
+            sourceImageWidth = img1.naturalWidth || img1.width || img1.clientWidth;
+            sourceImageHeight = img1.naturalHeight || img1.height || img1.clientHeight;
+            
+            console.log('=== DIFFERENCES INITIALIZED ===');
+            console.log('Image dimensions:', sourceImageWidth, 'x', sourceImageHeight);
+            console.log('Differences:', gameConfig.differences.length);
+            console.log('✅ Game ready!');
+        }
+        
+        // Create clickable areas for differences
+        function createDifferenceAreas() {
+            const img1 = document.getElementById('image1');
+            const img2 = document.getElementById('image2');
+            
+            // Wait for both images to load, then initialize
+            let img1Loaded = false;
+            let img2Loaded = false;
+            
+            function checkBothLoaded() {
+                if (img1Loaded && img2Loaded) {
+                    initializeDifferences();
+                    setupDifferenceAreas('imageContainer1');
+                    setupDifferenceAreas('imageContainer2');
+                }
+            }
+            
+            img1.addEventListener('load', function() {
+                img1Loaded = true;
+                const rect = img1.getBoundingClientRect();
+                image1Width = rect.width;
+                image1Height = rect.height;
+                checkBothLoaded();
+            });
+            
+            img2.addEventListener('load', function() {
+                img2Loaded = true;
+                const rect = img2.getBoundingClientRect();
+                image2Width = rect.width;
+                image2Height = rect.height;
+                checkBothLoaded();
+            });
+            
+            // Also check if already loaded
+            if (img1.complete && img1.naturalWidth > 0) {
+                img1Loaded = true;
+                const rect = img1.getBoundingClientRect();
+                image1Width = rect.width;
+                image1Height = rect.height;
+                checkBothLoaded();
+            }
+            
+            if (img2.complete && img2.naturalWidth > 0) {
+                img2Loaded = true;
+                const rect = img2.getBoundingClientRect();
+                image2Width = rect.width;
+                image2Height = rect.height;
+                checkBothLoaded();
+            }
+        }
+
+        function setupDifferenceAreas(containerId) {
+            const container = document.getElementById(containerId);
+            const img = document.getElementById(containerId === 'imageContainer1' ? 'image1' : 'image2');
+            const rect = img.getBoundingClientRect();
+            
+            gameConfig.differences.forEach((diff, index) => {
+                const area = document.createElement('div');
+                area.className = 'difference-area';
+                area.dataset.diffIndex = index;
+                
+                // Convert percentage to displayed pixels
+                const scaleX = rect.width / sourceImageWidth;
+                const scaleY = rect.height / sourceImageHeight;
+                const scale = Math.min(scaleX, scaleY);
+                
+                const x = (diff.x / 100) * rect.width;
+                const y = (diff.y / 100) * rect.height;
+                const radius = diff.radius * scale;
+                
+                area.style.left = (x - radius) + 'px';
+                area.style.top = (y - radius) + 'px';
+                area.style.width = (radius * 2) + 'px';
+                area.style.height = (radius * 2) + 'px';
+                
+                container.appendChild(area);
+            });
+        }
+
+        // Update progress
+        function updateProgress() {
+            const total = gameConfig.differences.length;
+            const found = foundDifferences.size;
+            const percentage = total > 0 ? (found / total) * 100 : 0;
+            
+            document.getElementById('progressText').textContent = `Found: ${found} / ${total} differences`;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            
+            if (found === total && total > 0) {
+                document.getElementById('successMessage').classList.add('show');
+            }
+        }
+
+        // Show hint
+        function showHint() {
+            const unfound = gameConfig.differences.filter((_, index) => !foundDifferences.has(index));
+            if (unfound.length > 0) {
+                const hint = unfound[0];
+                const hintMsg = document.getElementById('hintMessage');
+                hintMsg.textContent = `💡 Look around ${hint.x}% from the left and ${hint.y}% from the top!`;
+                hintMsg.classList.add('show');
+                setTimeout(() => {
+                    hintMsg.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Set images
+            document.getElementById('image1').src = gameConfig.image1;
+            document.getElementById('image2').src = gameConfig.image2;
+            
+            // Add click handlers - handle clicks anywhere on the container
+            document.getElementById('imageContainer1').addEventListener('click', (e) => {
+                // Allow clicks on the image or through overlays
+                handleImageClick(e, 'imageContainer1');
+            });
+            
+            document.getElementById('imageContainer2').addEventListener('click', (e) => {
+                // Allow clicks on the image or through overlays
+                handleImageClick(e, 'imageContainer2');
+            });
+            
+            document.getElementById('hintBtn').addEventListener('click', showHint);
+            
+            createDifferenceAreas();
+            updateProgress();
+        });
+    </script>
+ </body>
+</html>
+

@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Locked Drawer Puzzle</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .drawer-frame {
+            background: rgba(244, 228, 193, 0.2);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .lock-mechanism {
+            background: rgba(244, 228, 193, 0.3);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-input {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .code-digit {
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.5rem;
+            color: #f8fafc;
+            font-weight: 700;
+        }
+
+        .attempts-counter {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .drawer-frame {
+                padding: 1.5rem;
+            }
+
+            .lock-mechanism {
+                padding: 1rem;
+            }
+
+            .code-input {
+                gap: 0.375rem;
+                flex-wrap: wrap;
+            }
+
+            .code-digit {
+                width: 50px;
+                height: 50px;
+                font-size: 1.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .drawer-frame {
+                padding: 1rem;
+            }
+
+            .code-digit {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 8</div>
+    <h1 class="puzzle-title" id="drawerTitle">The Cryptkeeper's Vault</h1>
+    <p class="mystery-subtitle">Unlock the drawer to reveal the secret</p>
+   </header>
+
+   <main class="puzzle-container">
+    <div class="drawer-frame">
+     <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem;">
+      <p style="font-size: 1rem; line-height: 1.6; color: #cbd5e1; text-align: center;" id="clueText">"When midnight's bell tolls thrice, add the letters in 'RAVEN', multiply by the sides of fortune's wheel, then subtract the baker's dozen. What number opens the ancient seal?"</p>
+     </div>
+     <div class="lock-mechanism">
+      <div class="code-input" id="codeInputs">
+       <!-- Code inputs will be generated here -->
+      </div>
+      <div style="margin-top: 1rem; display: flex; gap: 0.75rem; justify-content: center;">
+       <button class="submit-button" id="submitBtn">Unlock Drawer</button>
+       <button class="submit-button secondary" id="resetBtn">Reset Code</button>
+      </div>
+      <div class="feedback" id="statusMessage"></div>
+      <div class="attempts-counter" id="attemptsCounter">Attempts: 0</div>
+     </div>
+    </div>
+   </main>
+  </div>
+  <script>
+        // Default configuration
+        const defaultConfig = {
+            drawer_title: "The Cryptkeeper's Vault",
+            clue_text: "When midnight's bell tolls thrice, add the letters in 'RAVEN', multiply by the sides of fortune's wheel, then subtract the baker's dozen. What number opens the ancient seal?"
+        };
+
+        // Puzzle solution: 3 + 5 = 8, 8 * 8 = 64, 64 - 13 = 51, 51 * 25 = 1275
+        // Actually, let's simplify: midnight tolls 3 times (3), RAVEN has 5 letters (5), fortune's wheel has 8 sides (8), baker's dozen is 13, Christmas Day is 25
+        // If the clue says "multiply by the sides of fortune's wheel" after adding, then: (3 + 5) * 8 = 64, 64 - 13 = 51
+        // But wait, the solution code is "1275" according to the original. Let me check the logic:
+        // The hint says: 3 + 5 = 8, 8 * 8 = 64, 64 - 13 = 51, 51 * 25 = 1275
+        // So: midnight (3) + RAVEN letters (5) = 8, * fortune's wheel sides (8) = 64, - baker's dozen (13) = 51, * Christmas Day (25) = 1275
+        const correctCode = "1275";
+        let attempts = 0;
+        let isUnlocked = false;
+
+        // Initialize code inputs
+        function initializeCodeInputs() {
+            const container = document.getElementById('codeInputs');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < correctCode.length; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'code-digit';
+                input.maxLength = 1;
+                input.dataset.index = i;
+                
+                input.addEventListener('input', handleDigitInput);
+                input.addEventListener('keydown', handleKeyDown);
+                
+                container.appendChild(input);
+            }
+        }
+
+        function handleDigitInput(e) {
+            const input = e.target;
+            const value = input.value.replace(/[^0-9]/g, '');
+            input.value = value;
+            
+            if (value && input.nextElementSibling) {
+                input.nextElementSibling.focus();
+            }
+            
+            clearInputStyles();
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Backspace' && !e.target.value && e.target.previousElementSibling) {
+                e.target.previousElementSibling.focus();
+            } else if (e.key === 'Enter') {
+                checkCode();
+            }
+        }
+
+        function clearInputStyles() {
+            document.querySelectorAll('.code-digit').forEach(input => {
+                input.classList.remove('correct', 'incorrect');
+            });
+        }
+
+        function checkCode() {
+            if (isUnlocked) return;
+            
+            const inputs = document.querySelectorAll('.code-digit');
+            const enteredCode = Array.from(inputs).map(input => input.value).join('');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            if (enteredCode.length !== correctCode.length) {
+                statusMessage.textContent = 'Please enter all digits of the code.';
+                statusMessage.className = 'status-message error';
+                return;
+            }
+            
+            attempts++;
+            document.getElementById('attemptsCounter').textContent = `Attempts: ${attempts}`;
+            
+            if (enteredCode === correctCode) {
+                // Success!
+                inputs.forEach(input => input.classList.add('correct'));
+                statusMessage.textContent = '🎄 Ho Ho Ho! The vault unlocks with magical Christmas chimes! 🔔✨';
+                statusMessage.className = 'status-message success';
+                
+                unlockDrawer();
+            } else {
+                // Incorrect
+                inputs.forEach(input => input.classList.add('incorrect'));
+                
+                if (attempts >= 3) {
+                    statusMessage.textContent = 'Hint: Think step by step! Midnight tolls 3 times, RAVEN has 5 letters, fortune\'s wheel has 8 sides, baker\'s dozen is 13, and Christmas Day is the 25th!';
+                    statusMessage.className = 'status-message hint';
+                } else {
+                    statusMessage.textContent = 'The vault remains locked. Study the clue more carefully...';
+                    statusMessage.className = 'status-message error';
+                }
+                
+                setTimeout(clearInputStyles, 1000);
+            }
+        }
+
+        function unlockDrawer() {
+            isUnlocked = true;
+            const drawerFrame = document.getElementById('drawerFrame');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Unlocked!';
+            
+            // Add unlock animation
+            drawerFrame.classList.add('unlocked');
+        }
+
+        function resetPuzzle() {
+            if (isUnlocked) return;
+            
+            const inputs = document.querySelectorAll('.code-digit');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            inputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            
+            statusMessage.textContent = '';
+            statusMessage.className = 'status-message';
+            
+            inputs[0].focus();
+        }
+
+        // Event listeners
+        document.getElementById('submitBtn').addEventListener('click', checkCode);
+        document.getElementById('resetBtn').addEventListener('click', resetPuzzle);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCodeInputs();
+            const firstInput = document.querySelector('.code-digit');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        });
+    </script>
+ </body>
+</html>
+

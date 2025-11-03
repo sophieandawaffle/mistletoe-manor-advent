@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christmas Memory Match</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .game-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(71, 85, 105, 0.4);
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fbbf24;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #cbd5e1;
+            margin-top: 0.25rem;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 1rem;
+            border: 1px solid rgba(71, 85, 105, 0.4);
+        }
+
+        .memory-card {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .memory-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
+
+        .memory-card.flipped {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            border-color: #10b981;
+            transform: rotateY(180deg);
+        }
+
+        .memory-card.matched {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            border-color: #ef4444;
+            cursor: default;
+            transform: scale(0.95);
+        }
+
+        .memory-card.matched:hover {
+            transform: scale(0.95);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+
+        .card-back {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #1e40af, #3730a3);
+            border-radius: 0.5rem;
+        }
+
+        .card-front {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: 2.5rem;
+        }
+
+        .memory-card.flipped .card-back {
+            display: none;
+        }
+
+        .memory-card.flipped .card-front {
+            display: flex;
+        }
+
+        .memory-card.matched .card-front {
+            display: flex;
+        }
+
+        .memory-card.matched .card-back {
+            display: none;
+        }
+
+        .game-controls {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .victory-stats {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .victory-stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+            color: #cbd5e1;
+        }
+
+        @media (max-width: 768px) {
+            .game-stats {
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 0.75rem 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.25rem;
+            }
+
+            .game-board {
+                gap: 0.75rem;
+                padding: 1.5rem;
+                max-width: 100%;
+            }
+
+            .memory-card {
+                font-size: 1.5rem;
+            }
+
+            .card-front {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-board {
+                gap: 0.5rem;
+                padding: 1rem;
+            }
+
+            .memory-card {
+                font-size: 1.25rem;
+            }
+
+            .card-front {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge" id="dateLabel">Day 12</div>
+    <h1 class="puzzle-title" id="gameTitle">Christmas Memory Match</h1>
+    <p class="mystery-subtitle">Match all the Christmas pairs!</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <div class="game-stats">
+     <div class="stat-card">
+      <span class="stat-value" id="movesCount">0</span>
+      <div class="stat-label">Moves</div>
+     </div>
+     <div class="stat-card">
+      <span class="stat-value" id="timeCount">0:00</span>
+      <div class="stat-label">Time</div>
+     </div>
+     <div class="stat-card">
+      <span class="stat-value" id="bestScore">--</span>
+      <div class="stat-label">Best Time</div>
+     </div>
+    </div>
+
+    <div class="game-board" id="gameBoard">
+     <!-- Cards will be generated by JavaScript -->
+    </div>
+
+    <div class="game-controls">
+     <button class="submit-button" id="newGameBtn">🎄 New Game</button>
+    </div>
+
+    <div class="completion-modal" id="victoryModal">
+     <div class="modal-content">
+      <div style="font-size: 4rem; color: #fbbf24; margin-bottom: 1rem;">🎉</div>
+      <h2 class="modal-title">Congratulations!</h2>
+      <p class="modal-text" id="victoryMessage">Ho ho ho! Well done! You've matched all the Christmas pairs!</p>
+      <div class="victory-stats">
+       <div class="victory-stat">
+        <span>Time:</span>
+        <span id="finalTime">0:00</span>
+       </div>
+       <div class="victory-stat">
+        <span>Moves:</span>
+        <span id="finalMoves">0</span>
+       </div>
+      </div>
+      <button class="submit-button" id="closeBtn" style="margin-top: 1rem;">Play Again</button>
+     </div>
+    </div>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        // Christmas emojis for the memory game
+        const christmasEmojis = ['🎄', '🎅', '⭐', '🎁', '🔔', '❄️', '🦌', '🍪'];
+
+        // Game state
+        let gameBoard = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let startTime = null;
+        let gameTimer = null;
+        let isGameActive = false;
+        let bestTime = null;
+
+        function setupEventListeners() {
+            document.getElementById('newGameBtn').addEventListener('click', initializeGame);
+            document.getElementById('closeBtn').addEventListener('click', () => {
+                document.getElementById('victoryModal').style.display = 'none';
+                initializeGame();
+            });
+        }
+
+        function initializeGame() {
+            // Reset game state
+            flippedCards = [];
+            matchedPairs = 0;
+            moves = 0;
+            startTime = null;
+            isGameActive = true;
+            
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+
+            // Update UI
+            document.getElementById('movesCount').textContent = '0';
+            document.getElementById('timeCount').textContent = '0:00';
+            document.getElementById('victoryModal').style.display = 'none';
+
+            // Create shuffled pairs
+            const pairs = [...christmasEmojis, ...christmasEmojis];
+            gameBoard = shuffleArray(pairs);
+
+            // Generate board HTML
+            const boardElement = document.getElementById('gameBoard');
+            boardElement.innerHTML = '';
+
+            gameBoard.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.index = index;
+                card.dataset.emoji = emoji;
+                
+                card.innerHTML = `
+                    <div class="card-back">❓</div>
+                    <div class="card-front">${emoji}</div>
+                `;
+                
+                card.addEventListener('click', () => handleCardClick(index));
+                boardElement.appendChild(card);
+            });
+
+            // Load best time from localStorage
+            const savedBestTime = localStorage.getItem('memory-match-best-time');
+            if (savedBestTime) {
+                bestTime = parseInt(savedBestTime);
+                const minutes = Math.floor(bestTime / 60);
+                const seconds = bestTime % 60;
+                document.getElementById('bestScore').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function handleCardClick(index) {
+            if (!isGameActive) return;
+            
+            const card = document.querySelector(`[data-index="${index}"]`);
+            
+            // Don't allow clicking already flipped or matched cards
+            if (card.classList.contains('flipped') || card.classList.contains('matched')) {
+                return;
+            }
+
+            // Don't allow more than 2 cards to be flipped
+            if (flippedCards.length >= 2) {
+                return;
+            }
+
+            // Start timer on first move
+            if (!startTime) {
+                startTime = Date.now();
+                startGameTimer();
+            }
+
+            // Flip the card
+            card.classList.add('flipped');
+            flippedCards.push({ index, emoji: gameBoard[index], element: card });
+
+            // Check for match when 2 cards are flipped
+            if (flippedCards.length === 2) {
+                moves++;
+                document.getElementById('movesCount').textContent = moves;
+
+                setTimeout(() => {
+                    checkForMatch();
+                }, 1000);
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.emoji === card2.emoji) {
+                // Match found
+                card1.element.classList.add('matched');
+                card2.element.classList.add('matched');
+                card1.element.classList.remove('flipped');
+                card2.element.classList.remove('flipped');
+                
+                matchedPairs++;
+
+                // Check for game completion
+                if (matchedPairs === christmasEmojis.length) {
+                    endGame();
+                }
+            } else {
+                // No match - flip cards back
+                card1.element.classList.remove('flipped');
+                card2.element.classList.remove('flipped');
+            }
+
+            flippedCards = [];
+        }
+
+        function startGameTimer() {
+            gameTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeCount').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function endGame() {
+            isGameActive = false;
+            clearInterval(gameTimer);
+
+            const finalTime = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(finalTime / 60);
+            const seconds = finalTime % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            // Update victory modal
+            document.getElementById('finalTime').textContent = timeString;
+            document.getElementById('finalMoves').textContent = moves;
+
+            // Save best time
+            if (!bestTime || finalTime < bestTime) {
+                bestTime = finalTime;
+                localStorage.setItem('memory-match-best-time', bestTime.toString());
+                const bestMinutes = Math.floor(bestTime / 60);
+                const bestSeconds = bestTime % 60;
+                document.getElementById('bestScore').textContent = 
+                    `${bestMinutes}:${bestSeconds.toString().padStart(2, '0')}`;
+            }
+
+            // Create success animation
+            createSuccessAnimation();
+
+            // Show victory modal
+            setTimeout(() => {
+                document.getElementById('victoryModal').style.display = 'flex';
+            }, 500);
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            initializeGame();
+        });
+    </script>
+ </body>
+</html>
+

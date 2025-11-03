@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Manor Maze - Word Search</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .wordsearch-container {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .grid-container {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 1rem;
+        }
+
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 2px;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 0.25rem;
+            font-weight: 600;
+            color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .grid-cell:hover {
+            background: rgba(59, 130, 246, 0.3);
+        }
+
+        .grid-cell.selected {
+            background: rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6;
+        }
+
+        .grid-cell.found {
+            background: rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+            text-decoration: line-through;
+            position: relative;
+        }
+        
+        .grid-cell.found::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #4ade80;
+            transform: translateY(-50%);
+        }
+
+        .word-list {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            padding: 1rem;
+            max-width: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .word-item {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .word-item.found {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            text-decoration: line-through;
+        }
+
+        @media (max-width: 768px) {
+            .wordsearch-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .grid-container {
+                padding: 0.75rem;
+            }
+
+            .word-grid {
+                gap: 1.5px;
+                max-width: 100%;
+            }
+
+            .grid-cell {
+                font-size: 0.875rem;
+            }
+
+            .word-list {
+                max-width: 100%;
+                max-height: 300px;
+                padding: 0.75rem;
+            }
+
+            .word-item {
+                padding: 0.375rem;
+                margin-bottom: 0.375rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid-cell {
+                font-size: 0.75rem;
+            }
+
+            .word-item {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 7</div>
+    <h1 class="puzzle-title" id="gameTitle">The Manor Maze</h1>
+    <p class="mystery-subtitle" id="subtitleText">A Mistletoe Manor Mystery</p>
+   </header>
+
+   <main class="puzzle-container">
+    <p style="text-align: center; margin-bottom: 1.5rem; color: #cbd5e1;" id="instructionsText">Click and drag to select words hidden in the grid. Find all 11 clues to solve the mystery!</p>
+    <div class="wordsearch-container">
+     <div class="grid-container">
+      <div class="word-grid" id="wordGrid"></div>
+     </div>
+     <div class="word-list">
+      <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: #f8fafc;">Mystery Words</h3>
+      <div id="wordList"></div>
+      <h3 style="font-size: 1rem; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #f8fafc;">Discovered Clues</h3>
+      <div id="cluesList" style="font-size: 0.875rem; color: #cbd5e1;"></div>
+      <div style="margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: #94a3b8;" id="progressText">0 / 11 words found</div>
+      <div id="completionMessage" style="display: none; margin-top: 1rem; text-align: center; padding: 1rem; background: rgba(34, 197, 94, 0.2); border-radius: 0.75rem; border: 1px solid rgba(34, 197, 94, 0.3);">
+       <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: #4ade80;">🎄 Mystery Solved! 🎄</h2>
+       <p style="color: #cbd5e1; font-size: 0.875rem;">You've uncovered all the secrets of Mistletoe Manor. Well done, detective!</p>
+      </div>
+     </div>
+    </div>
+   </main>
+  </div>
+  <script>
+        const defaultConfig = {
+            game_title: "The Manor Maze",
+            subtitle_text: "A Mistletoe Manor Mystery",
+            instructions_text: "Click and drag to select words hidden in the grid. Find all 11 clues to solve the mystery!"
+        };
+
+        const words = [
+            { word: 'TEACUP', clue: 'Found shattered by the fireplace' },
+            { word: 'STUDY', clue: 'Where the victim was last seen alive' },
+            { word: 'ALIBI', clue: 'What everyone claims to have' },
+            { word: 'POISON', clue: 'The method hidden in plain sight' },
+            { word: 'MISTLETOE', clue: 'Hanging ominously above the scene' },
+            { word: 'LIBRARY', clue: 'Books hold more than stories here' },
+            { word: 'CANDLE', clue: 'Flickered out at the crucial moment' },
+            { word: 'MANOR', clue: 'Ancient walls that keep their secrets' },
+            { word: 'GUEST', clue: 'Not everyone invited was welcome' },
+            { word: 'SNOW', clue: 'Trapped everyone inside that night' },
+            { word: 'CLUE', clue: 'Hidden in the most obvious places' }
+        ];
+
+        let grid = [];
+        let foundWords = new Set();
+        let foundCells = new Set(); // Store found cell positions as "row,col"
+        let isSelecting = false;
+        let selectedCells = [];
+        let startCell = null;
+
+        // Create snowfall effect
+        function createSnowfall() {
+            const snowfall = document.getElementById('snowfall');
+            const snowflakes = ['❄', '❅', '❆'];
+            
+            function createSnowflake() {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.innerHTML = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+                snowflake.style.left = Math.random() * 100 + '%';
+                snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                snowflake.style.opacity = Math.random();
+                snowfall.appendChild(snowflake);
+                
+                setTimeout(() => {
+                    if (snowflake.parentNode) {
+                        snowflake.parentNode.removeChild(snowflake);
+                    }
+                }, 5000);
+            }
+            
+            setInterval(createSnowflake, 300);
+        }
+
+        function createGrid() {
+            const gridSize = 15;
+            grid = Array(gridSize).fill().map(() => Array(gridSize).fill(''));
+            
+            // Place words in grid
+            words.forEach(wordObj => {
+                placeWordInGrid(wordObj.word, gridSize);
+            });
+            
+            // Fill empty cells with random letters
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    if (grid[i][j] === '') {
+                        grid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                    }
+                }
+            }
+        }
+
+        function placeWordInGrid(word, gridSize) {
+            let placed = false;
+            let attempts = 0;
+            
+            while (!placed && attempts < 100) {
+                const direction = Math.floor(Math.random() * 8); // 8 directions
+                const row = Math.floor(Math.random() * gridSize);
+                const col = Math.floor(Math.random() * gridSize);
+                
+                if (canPlaceWord(word, row, col, direction, gridSize)) {
+                    placeWord(word, row, col, direction);
+                    placed = true;
+                }
+                attempts++;
+            }
+        }
+
+        function canPlaceWord(word, row, col, direction, gridSize) {
+            const directions = [
+                [-1, -1], [-1, 0], [-1, 1],
+                [0, -1],           [0, 1],
+                [1, -1],  [1, 0],  [1, 1]
+            ];
+            
+            const [dRow, dCol] = directions[direction];
+            
+            for (let i = 0; i < word.length; i++) {
+                const newRow = row + i * dRow;
+                const newCol = col + i * dCol;
+                
+                if (newRow < 0 || newRow >= gridSize || newCol < 0 || newCol >= gridSize) {
+                    return false;
+                }
+                
+                if (grid[newRow][newCol] !== '' && grid[newRow][newCol] !== word[i]) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function placeWord(word, row, col, direction) {
+            const directions = [
+                [-1, -1], [-1, 0], [-1, 1],
+                [0, -1],           [0, 1],
+                [1, -1],  [1, 0],  [1, 1]
+            ];
+            
+            const [dRow, dCol] = directions[direction];
+            
+            for (let i = 0; i < word.length; i++) {
+                const newRow = row + i * dRow;
+                const newCol = col + i * dCol;
+                grid[newRow][newCol] = word[i];
+            }
+        }
+
+        function renderGrid() {
+            const gridElement = document.getElementById('wordGrid');
+            gridElement.innerHTML = '';
+            
+            for (let i = 0; i < 15; i++) {
+                for (let j = 0; j < 15; j++) {
+                    const cell = document.createElement('div');
+                    const cellKey = `${i},${j}`;
+                    cell.className = 'grid-cell';
+                    
+                    // Add found class if this cell is part of a found word
+                    if (foundCells.has(cellKey)) {
+                        cell.classList.add('found');
+                    }
+                    
+                    cell.textContent = grid[i][j];
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    
+                    cell.addEventListener('mousedown', startSelection);
+                    cell.addEventListener('mouseenter', continueSelection);
+                    cell.addEventListener('mouseup', endSelection);
+                    
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        function renderWordList() {
+            const wordListElement = document.getElementById('wordList');
+            wordListElement.innerHTML = '';
+            
+            words.forEach(wordObj => {
+                const wordItem = document.createElement('div');
+                wordItem.className = `word-item ${foundWords.has(wordObj.word) ? 'found' : ''}`;
+                
+                wordItem.innerHTML = `
+                    <span class="word-text">${wordObj.word}</span>
+                    ${foundWords.has(wordObj.word) ? '<span class="checkmark">✓</span>' : ''}
+                `;
+                
+                wordListElement.appendChild(wordItem);
+            });
+        }
+
+        function startSelection(e) {
+            isSelecting = true;
+            selectedCells = [];
+            startCell = { row: parseInt(e.target.dataset.row), col: parseInt(e.target.dataset.col) };
+            
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            
+            e.target.classList.add('selected');
+            selectedCells.push(startCell);
+        }
+
+        function continueSelection(e) {
+            if (!isSelecting) return;
+            
+            const currentRow = parseInt(e.target.dataset.row);
+            const currentCol = parseInt(e.target.dataset.col);
+            
+            // Clear previous selection
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            
+            // Calculate selection path
+            selectedCells = getSelectionPath(startCell, { row: currentRow, col: currentCol });
+            
+            // Highlight selected cells
+            selectedCells.forEach(cell => {
+                const cellElement = document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`);
+                if (cellElement) {
+                    cellElement.classList.add('selected');
+                }
+            });
+        }
+
+        function endSelection() {
+            if (!isSelecting) return;
+            isSelecting = false;
+            
+            const selectedWord = selectedCells.map(cell => grid[cell.row][cell.col]).join('');
+            const reversedWord = selectedWord.split('').reverse().join('');
+            
+            // Check if selected word matches any target word
+            const foundWord = words.find(wordObj => 
+                wordObj.word === selectedWord || wordObj.word === reversedWord
+            );
+            
+            if (foundWord && !foundWords.has(foundWord.word)) {
+                foundWords.add(foundWord.word);
+                
+                // Store found cell positions permanently
+                selectedCells.forEach(cell => {
+                    const cellKey = `${cell.row},${cell.col}`;
+                    foundCells.add(cellKey);
+                });
+                
+                // Mark cells as found (both in DOM and in our tracking)
+                selectedCells.forEach(cell => {
+                    const cellElement = document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`);
+                    if (cellElement) {
+                        cellElement.classList.add('found');
+                    }
+                });
+                
+                // Update UI
+                renderWordList();
+                revealClue(foundWord.clue);
+                updateProgress();
+                
+                if (foundWords.size === words.length) {
+                    showCompletion();
+                }
+            }
+            
+            // Clear selection
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+        }
+
+        function getSelectionPath(start, end) {
+            const path = [];
+            const rowDiff = end.row - start.row;
+            const colDiff = end.col - start.col;
+            
+            // Only allow straight lines (horizontal, vertical, diagonal)
+            if (rowDiff !== 0 && colDiff !== 0 && Math.abs(rowDiff) !== Math.abs(colDiff)) {
+                return [start]; // Invalid selection
+            }
+            
+            const steps = Math.max(Math.abs(rowDiff), Math.abs(colDiff));
+            const rowStep = steps === 0 ? 0 : rowDiff / steps;
+            const colStep = steps === 0 ? 0 : colDiff / steps;
+            
+            for (let i = 0; i <= steps; i++) {
+                path.push({
+                    row: start.row + Math.round(i * rowStep),
+                    col: start.col + Math.round(i * colStep)
+                });
+            }
+            
+            return path;
+        }
+
+        function revealClue(clue) {
+            const cluesContainer = document.getElementById('cluesList');
+            const clueElement = document.createElement('div');
+            clueElement.className = 'clue-item';
+            clueElement.textContent = clue;
+            
+            cluesContainer.appendChild(clueElement);
+            
+            // Trigger reveal animation
+            setTimeout(() => {
+                clueElement.classList.add('revealed');
+            }, 100);
+        }
+
+        function updateProgress() {
+            const progressText = document.getElementById('progressText');
+            progressText.textContent = `${foundWords.size} / ${words.length} words found`;
+        }
+
+        function showCompletion() {
+            const completionMessage = document.getElementById('completionMessage');
+            setTimeout(() => {
+                completionMessage.style.display = 'block';
+            }, 1000);
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', () => {
+            createGrid();
+            renderGrid();
+            renderWordList();
+            updateProgress();
+            
+            // Prevent text selection during drag
+            document.addEventListener('selectstart', e => e.preventDefault());
+        });
+    </script>
+ </body>
+</html>
+

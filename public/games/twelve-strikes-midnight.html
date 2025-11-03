@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twelve Strikes at Midnight</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .clock-container {
+            position: relative;
+            margin: 2rem auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .clock {
+            width: 200px;
+            height: 200px;
+            border: 8px solid #fbbf24;
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clock-face {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fbbf24;
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .timer-label {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+            width: 100%;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 2rem auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #334155;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #fbbf24;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #dc2626, #fbbf24, #16a34a);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .strikes-counter {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #fbbf24;
+            font-weight: 600;
+        }
+
+        .question-container {
+            background: rgba(30, 41, 59, 0.9);
+            border: 2px solid #fbbf24;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            box-sizing: border-box;
+        }
+
+        .question {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .answer-btn {
+            background: linear-gradient(135deg, #475569, #64748b);
+            border: 2px solid #94a3b8;
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: 500;
+            box-sizing: border-box;
+        }
+
+        .answer-btn:hover {
+            background: linear-gradient(135deg, #64748b, #94a3b8);
+            border-color: #fbbf24;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            border-color: #22c55e;
+        }
+
+        .answer-btn.incorrect {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            border-color: #ef4444;
+        }
+
+        .start-screen, .end-screen {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .game-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .game-description {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            color: #cbd5e1;
+            text-align: center;
+        }
+
+        .final-score {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #fbbf24;
+            font-weight: 700;
+            text-align: center;
+            width: 100%;
+        }
+
+        .end-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        .end-message.success {
+            color: #22c55e;
+        }
+
+        .end-message.timeout {
+            color: #fbbf24;
+        }
+
+        .bell-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            color: #fbbf24;
+            z-index: 100;
+            animation: bellRing 0.8s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes bellRing {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-30deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotate(15deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0; }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .clock {
+                width: 150px;
+                height: 150px;
+            }
+
+            .clock-face {
+                font-size: 1.5rem;
+            }
+
+            .answers {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+                width: 100%;
+                max-width: 100%;
+                margin: 0 auto;
+            }
+
+            .question {
+                font-size: 1.1rem;
+            }
+
+            .answer-btn {
+                font-size: 1rem;
+                padding: 0.875rem;
+                width: 100%;
+                max-width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+            }
+
+            .question-container {
+                padding: 1rem;
+                width: 100%;
+                max-width: 100%;
+                margin: 1rem auto;
+                box-sizing: border-box;
+                overflow-x: hidden;
+            }
+
+            .answers {
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            .puzzle-container {
+                overflow-x: hidden;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .game-description {
+                font-size: 1rem;
+            }
+
+            .final-score {
+                font-size: 1.5rem;
+            }
+
+            .end-message {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .clock {
+                width: 120px;
+                height: 120px;
+            }
+
+            .clock-face {
+                font-size: 1.25rem;
+            }
+
+            .strikes-counter {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 13</div>
+    <h1 class="puzzle-title" id="gameTitle">🎄 Twelve Strikes at Midnight ⏰</h1>
+    <p class="mystery-subtitle">Beat the clock and solve all 12 questions!</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <div class="start-screen" id="startScreen">
+     <p class="game-description">The clock is ticking toward midnight on Christmas Eve! You must solve 12 festive mysteries before the final bell tolls. Each correct answer brings you closer to Christmas magic, but time is running out. Can you beat the countdown?</p>
+     <button class="submit-button" id="startBtn">🎅 Begin the Challenge 🎅</button>
+    </div>
+
+    <div class="game-screen hidden" id="gameScreen">
+     <div class="timer-label" id="timerLabel">Time Until Midnight</div>
+     <div class="clock-container">
+      <div class="clock">
+       <div class="clock-face" id="timeDisplay">60</div>
+      </div>
+     </div>
+     <div class="progress-container">
+      <div class="strikes-counter" id="strikesCounter">Strikes: 0 / 12 🔔</div>
+      <div class="progress-bar" style="width: 100%;">
+       <div class="progress-fill" id="progressFill"></div>
+      </div>
+     </div>
+     <div class="question-container" id="questionContainer">
+      <div class="question" id="questionText"></div>
+      <div class="answers" id="answersContainer"></div>
+     </div>
+    </div>
+
+    <div class="end-screen hidden" id="endScreen">
+     <div class="final-score" id="finalScore"></div>
+     <div class="end-message" id="endMessage"></div>
+     <button class="submit-button" id="restartBtn">🎮 Play Again 🎮</button>
+    </div>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        const questions = [
+            {
+                question: "🎅 In which country did the modern image of Santa Claus originate?",
+                answers: ["Germany", "Netherlands", "Finland", "United States"],
+                correct: 3
+            },
+            {
+                question: "🦌 How many reindeer pull Santa's sleigh in 'Twas the Night Before Christmas'?",
+                answers: ["Six", "Seven", "Eight", "Nine"],
+                correct: 2
+            },
+            {
+                question: "🎄 Which Roman festival influenced many Christmas traditions?",
+                answers: ["Lupercalia", "Saturnalia", "Floralia", "Bacchanalia"],
+                correct: 1
+            },
+            {
+                question: "🍪 In which country is it traditional to eat KFC on Christmas?",
+                answers: ["South Korea", "Japan", "Thailand", "Philippines"],
+                correct: 1
+            },
+            {
+                question: "❄️ What is the scientific term for the fear of Christmas?",
+                answers: ["Christmasphobia", "Natalophobia", "Yuletidephobia", "Santaphobia"],
+                correct: 1
+            },
+            {
+                question: "🎁 Boxing Day gets its name from boxes given to whom?",
+                answers: ["Children", "Servants", "Soldiers", "Priests"],
+                correct: 1
+            },
+            {
+                question: "🔔 'Carol of the Bells' is based on a folk song from which country?",
+                answers: ["Poland", "Russia", "Ukraine", "Czech Republic"],
+                correct: 2
+            },
+            {
+                question: "🎵 In 'The Twelve Days of Christmas', what is given on the 7th day?",
+                answers: ["Seven swans swimming", "Seven geese laying", "Seven lords leaping", "Seven ladies dancing"],
+                correct: 0
+            },
+            {
+                question: "🧦 The tradition of Christmas stockings comes from the legend of which saint?",
+                answers: ["St. Francis", "St. Nicholas", "St. Patrick", "St. Valentine"],
+                correct: 1
+            },
+            {
+                question: "🎪 What was the original color of Coca-Cola's Santa before red?",
+                answers: ["Blue", "Green", "Brown", "He was always red"],
+                correct: 3
+            },
+            {
+                question: "⭐ According to tradition, how many wise men visited baby Jesus?",
+                answers: ["Two", "Three", "Four", "The Bible doesn't specify"],
+                correct: 3
+            },
+            {
+                question: "🎉 Christmas was banned in England under which ruler?",
+                answers: ["Henry VIII", "Oliver Cromwell", "Queen Victoria", "King James I"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let strikes = 0;
+        let timeLeft = 60;
+        let gameTimer;
+        let gameActive = false;
+
+        function showBellAnimation() {
+            const bell = document.createElement('div');
+            bell.className = 'bell-animation';
+            bell.innerHTML = '🔔';
+            document.body.appendChild(bell);
+            
+            setTimeout(() => {
+                document.body.removeChild(bell);
+            }, 800);
+        }
+
+        function updateDisplay() {
+            document.getElementById('timeDisplay').textContent = timeLeft;
+            document.getElementById('strikesCounter').textContent = `Strikes: ${strikes} / 12 🔔`;
+            document.getElementById('progressFill').style.width = (strikes / 12) * 100 + '%';
+        }
+
+        function displayQuestion() {
+            if (currentQuestion >= questions.length) {
+                endGame(strikes >= 12);
+                return;
+            }
+
+            const question = questions[currentQuestion];
+            document.getElementById('questionText').textContent = question.question;
+            
+            const answersContainer = document.getElementById('answersContainer');
+            answersContainer.innerHTML = '';
+            
+            question.answers.forEach((answer, index) => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = answer;
+                button.onclick = () => selectAnswer(index);
+                answersContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedIndex) {
+            if (!gameActive) return;
+
+            const question = questions[currentQuestion];
+            const buttons = document.querySelectorAll('.answer-btn');
+            
+            buttons.forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === question.correct) {
+                    btn.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            if (selectedIndex === question.correct) {
+                strikes++;
+                showBellAnimation();
+                updateDisplay();
+                createSuccessAnimation();
+            }
+            
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion >= questions.length) {
+                    endGame(strikes >= 12);
+                } else {
+                    displayQuestion();
+                }
+            }, 1500);
+        }
+
+        function startGame() {
+            gameActive = true;
+            currentQuestion = 0;
+            strikes = 0;
+            timeLeft = 60;
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            
+            updateDisplay();
+            displayQuestion();
+            
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                
+                if (timeLeft <= 0) {
+                    endGame(false);
+                }
+            }, 1000);
+        }
+
+        function endGame(won) {
+            gameActive = false;
+            clearInterval(gameTimer);
+            
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('endScreen').classList.remove('hidden');
+            
+            const finalScore = document.getElementById('finalScore');
+            const endMessage = document.getElementById('endMessage');
+            
+            if (won) {
+                finalScore.textContent = `🎉 Victory! You rang all 12 bells! 🎉`;
+                endMessage.className = 'end-message success';
+                endMessage.innerHTML = `
+                    Congratulations! You've mastered the Christmas countdown and saved the holiday magic! 
+                    🎄✨ The bells of midnight ring in celebration of your triumph!
+                `;
+                createSuccessAnimation();
+            } else {
+                finalScore.textContent = `⏰ Time's Up! You rang ${strikes} out of 12 bells`;
+                endMessage.className = 'end-message timeout';
+                endMessage.innerHTML = `
+                    The clock struck midnight before you could complete all the challenges! 
+                    🕛 But don't worry - Christmas magic never truly fades. Try again!
+                `;
+            }
+        }
+
+        function restartGame() {
+            document.getElementById('endScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('startBtn').onclick = startGame;
+            document.getElementById('restartBtn').onclick = restartGame;
+        });
+    </script>
+ </body>
+</html>
+

@@ -37,7 +37,12 @@ export function LogoutButton({ calendarId }: LogoutButtonProps) {
   }
 
   return (
-    <Button variant="secondary" size="sm" onClick={handleLogout} className="gap-2 !rotate-0 !skew-x-0 w-40">
+    <Button 
+      variant="outline" 
+      size="sm" 
+      onClick={handleLogout} 
+      className="gap-2 !rotate-0 !skew-x-0 w-40 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border-slate-600/50"
+    >
       <LogOut className="h-4 w-4" />
       Logout
     </Button>

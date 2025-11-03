@@ -117,7 +117,7 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
       return
     }
 
-    const content = getDayContent(day)
+    const content = getDayContent(day, calendarId)
     if (content) {
       setSelectedDay(content)
       setOpenedDays((prev) => new Set(prev).add(day))
@@ -131,7 +131,7 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
         <div className="w-full">
           <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto p-4">
             {Array.from({ length: 24 }, (_, i) => i + 1).map((day) => {
-              const content = getDayContent(day)
+              const content = getDayContent(day, calendarId)
               return (
                 <AdventDoor
                   key={day}
@@ -142,6 +142,7 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
                   doorImageUrl={content?.doorImageUrl || ""}
                   onClick={() => handleDoorClick(day)}
                   isMobile={true}
+                  calendarId={calendarId}
                 />
               )
             })}
@@ -151,7 +152,7 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
         // Desktop: Absolute positioning
         <div className="relative w-full h-[100vh] sm:h-[100vh] md:min-h-[70vh]">
           {Array.from({ length: 24 }, (_, i) => i + 1).map((day) => {
-            const content = getDayContent(day)
+            const content = getDayContent(day, calendarId)
             return (
               <AdventDoor
                 key={day}
@@ -162,6 +163,7 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
                 doorImageUrl={content?.doorImageUrl || ""}
                 onClick={() => handleDoorClick(day)}
                 isMobile={false}
+                calendarId={calendarId}
               />
             )
           })}

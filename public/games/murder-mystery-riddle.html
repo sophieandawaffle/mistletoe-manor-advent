@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Murder Mystery Riddle</title>
+  <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, oklch(0.45 0.12 25) 0%, oklch(0.35 0.10 25) 50%, oklch(0.25 0.08 25) 100%);
+            color: oklch(0.98 0.01 70);
+            min-height: 100%;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 1rem 0.75rem;
+            min-height: 100%;
+        }
+
+        .mystery-header {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: oklch(0.98 0.01 70);
+            border-radius: 0.4rem;
+            border: 2px solid oklch(0.45 0.12 25);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .mystery-title {
+            font-size: 1.5rem;
+            color: oklch(0.45 0.12 25);
+            margin-bottom: 0.3rem;
+            font-weight: 700;
+        }
+
+        .mystery-subtitle {
+            font-size: 0.9rem;
+            color: oklch(0.5 0.13 25);
+            font-style: italic;
+        }
+
+        .story-section {
+            background: oklch(0.98 0.01 70);
+            padding: 1rem;
+            border-radius: 0.4rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid oklch(0.45 0.12 25);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            color: oklch(0.25 0.02 45);
+            font-size: 0.9rem;
+        }
+
+        .clue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .clue-card {
+            background: oklch(0.98 0.01 70);
+            padding: 1rem;
+            border-radius: 0.4rem;
+            border: 1px solid oklch(0.82 0.02 65);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .clue-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border-color: oklch(0.45 0.12 25);
+        }
+
+        .clue-card.revealed {
+            background: oklch(0.96 0.015 75);
+            border-color: oklch(0.45 0.12 25);
+            border-width: 2px;
+        }
+
+        .clue-number {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: oklch(0.45 0.12 25);
+            color: oklch(0.98 0.01 70);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+
+        .clue-title {
+            font-size: 0.95rem;
+            color: #8B0000;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        .clue-content {
+            color: #1a1a1a;
+            line-height: 1.5;
+            font-size: 0.85rem;
+        }
+
+        .hidden-clue {
+            display: none;
+            color: #1a1a1a;
+        }
+        
+        .hidden-clue strong {
+            color: #8B0000;
+        }
+
+        .suspects-section {
+            margin-top: 1.5rem;
+        }
+
+        .suspects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .suspect-card {
+            background: oklch(0.98 0.01 70);
+            padding: 1rem;
+            border-radius: 0.4rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid oklch(0.82 0.02 65);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            color: oklch(0.25 0.02 45);
+        }
+
+        .suspect-card:hover {
+            border-color: oklch(0.5 0.13 25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .suspect-card.selected {
+            border-color: oklch(0.45 0.12 25);
+            background: oklch(0.96 0.015 75);
+            border-width: 3px;
+        }
+
+        .suspect-name {
+            font-size: 1rem;
+            color: oklch(0.45 0.12 25);
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        .suspect-role {
+            color: oklch(0.5 0.13 25);
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .solution-section {
+            background: oklch(0.98 0.01 70);
+            padding: 1rem;
+            border-radius: 0.4rem;
+            margin-top: 1rem;
+            border: 2px solid oklch(0.45 0.12 25);
+            display: none;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            color: oklch(0.25 0.02 45);
+            font-size: 0.9rem;
+        }
+
+        .solution-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn {
+            background: oklch(0.45 0.12 25);
+            color: oklch(0.98 0.01 70);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0.4rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            background: oklch(0.5 0.13 25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:disabled {
+            background: oklch(0.82 0.02 65);
+            color: oklch(0.25 0.02 45);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            background: oklch(0.82 0.02 65);
+            height: 6px;
+            border-radius: 3px;
+            margin: 0.75rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: oklch(0.45 0.12 25);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .emoji {
+            font-size: 1.2rem;
+            margin-right: 0.4rem;
+        }
+        
+        h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+    </style>
+ </head>
+ <body>
+  <main class="container">
+   <header class="mystery-header">
+    <h1 class="mystery-title" id="mysteryTitle">The Mansion Murder Mystery</h1>
+    <p class="mystery-subtitle">Can you solve the case before the killer strikes again?</p>
+   </header>
+   <section class="story-section">
+    <h2>🏚️ The Crime Scene</h2>
+    <p>A stormy night at Blackwood Manor. <span id="victimName">Lord Blackwood</span> has been found dead in his study at <span id="locationName">Blackwood Manor</span>. The doors were locked from the inside, but something doesn't add up. Three suspects remain in the house, each with their own secrets...</p>
+    <div class="progress-bar">
+     <div class="progress-fill" id="progressBar"></div>
+    </div>
+    <p><strong>Clues Discovered: <span id="clueCount">0</span>/6</strong></p>
+   </section>
+   <section class="clues-section">
+    <h2>🔍 Investigate the Clues</h2>
+    <p>Click on each area to uncover vital evidence. Pay attention to the details!</p>
+    <div class="clue-grid">
+     <div class="clue-card" onclick="revealClue(1)">
+      <div class="clue-number">1</div>
+      <div class="clue-title">🚪 The Locked Door</div>
+      <div class="clue-content">The study door was locked from the inside, but you notice something unusual about the key...</div>
+      <div class="hidden-clue" id="clue1">
+       <hr style="margin: 1rem 0; border-color: #666;"><strong>Discovery:</strong> The key shows fresh scratches and metal filings on the floor. Someone used a thin wire to turn the key from outside after locking it from within.
+      </div>
+     </div>
+     <div class="clue-card" onclick="revealClue(2)">
+      <div class="clue-number">2</div>
+      <div class="clue-title">☕ The Tea Cup</div>
+      <div class="clue-content">A half-empty tea cup sits on the desk, still warm to the touch...</div>
+      <div class="hidden-clue" id="clue2">
+       <hr style="margin: 1rem 0; border-color: #666;"><strong>Discovery:</strong> The tea contains traces of a rare sleeping herb - Valerian root. Only someone with botanical knowledge would know its effects.
+      </div>
+     </div>
+     <div class="clue-card" onclick="revealClue(3)">
+      <div class="clue-number">3</div>
+      <div class="clue-title">📚 The Bookshelf</div>
+      <div class="clue-content">Several books have been disturbed, and one lies open on the floor...</div>
+      <div class="hidden-clue" id="clue3">
+       <hr style="margin: 1rem 0; border-color: #666;"><strong>Discovery:</strong> The open book is "Advanced Locksmithing Techniques." A bookmark marks a chapter on "Remote Key Manipulation."
+      </div>
+     </div>
+     <div class="clue-card" onclick="revealClue(4)">
+      <div class="clue-number">4</div>
+      <div class="clue-title">🕰️ The Grandfather Clock</div>
+      <div class="clue-content">The clock stopped at exactly 11:47 PM, but something seems off about the time...</div>
+      <div class="hidden-clue" id="clue4">
+       <hr style="margin: 1rem 0; border-color: #666;"><strong>Discovery:</strong> The clock's pendulum was deliberately stopped. Fresh fingerprints on the glass case belong to someone trying to create a false timeline.
+      </div>
+     </div>
+     <div class="clue-card" onclick="revealClue(5)">
+      <div class="clue-number">5</div>
+      <div class="clue-title">🖼️ The Portrait</div>
+      <div class="clue-content">A family portrait hangs crooked on the wall, revealing something hidden behind it...</div>
+      <div class="hidden-clue" id="clue5">
+       <hr style="margin: 1rem 0; border-color: #666;"><strong>Discovery:</strong> Behind the portrait is a hidden safe, recently opened. Inside, you find a will that was changed just last week, cutting someone out of the inheritance.
+      </div>
+     </div>
+     <div class="clue-card" onclick="revealClue(6)">
+      <div class="clue-number">6</div>
+      <div class="clue-title">👥 The Muddy Footprints</div>
+      <div class="clue-content">Faint muddy footprints lead from the garden door to the study...</div>
+      <div class="hidden-clue" id="clue6">
+       <hr style="margin: 1rem 0; border-color: #666;"><strong>Discovery:</strong> The footprints match expensive gardening boots, size 8. They show someone entered through the garden after working with soil and plants.
+      </div>
+     </div>
+    </div>
+   </section>
+   <section class="suspects-section">
+    <h2>🎭 The Suspects</h2>
+    <p>Three people were in the manor that night. Who do you think is the killer?</p>
+    <div class="suspects-grid">
+     <div class="suspect-card" onclick="selectSuspect('margaret')">
+      <div class="suspect-name">Margaret Blackwood</div>
+      <div class="suspect-role">The Grieving Widow</div>
+      <p style="margin-top: 1rem; font-size: 0.9rem;">Recently discovered her husband was planning to divorce her. Has extensive knowledge of herbs from her garden hobby.</p>
+     </div>
+     <div class="suspect-card" onclick="selectSuspect('james')">
+      <div class="suspect-name">James Fletcher</div>
+      <div class="suspect-role">The Butler</div>
+      <p style="margin-top: 1rem; font-size: 0.9rem;">Served the family for 20 years. Recently learned he was being written out of the will. Has keys to every room.</p>
+     </div>
+     <div class="suspect-card" onclick="selectSuspect('victoria')">
+      <div class="suspect-name">Victoria Blackwood</div>
+      <div class="suspect-role">The Estranged Daughter</div>
+      <p style="margin-top: 1rem; font-size: 0.9rem;">Cut off from the family fortune years ago. Studied engineering and locksmithing. Wears size 8 boots.</p>
+     </div>
+    </div>
+    <div style="text-align: center; margin-top: 2rem;">
+     <button class="btn" onclick="makeAccusation()" id="accuseBtn" disabled>Make Your Accusation</button>
+     <button class="btn" onclick="resetMystery()">Start Over</button>
+    </div>
+   </section>
+   <section class="solution-section" id="solutionSection">
+    <h2>🎯 The Solution</h2>
+    <div id="solutionText"></div>
+   </section>
+  </main>
+  <script>
+        let revealedClues = 0;
+        let selectedSuspect = null;
+        
+        const defaultConfig = {
+            mystery_title: "The Mansion Murder Mystery",
+            victim_name: "Lord Blackwood",
+            location_name: "Blackwood Manor"
+        };
+
+        function revealClue(clueNumber) {
+            const clueCard = document.querySelector(`#clue${clueNumber}`).parentElement;
+            const hiddenClue = document.getElementById(`clue${clueNumber}`);
+            
+            if (!clueCard.classList.contains('revealed')) {
+                hiddenClue.style.display = 'block';
+                clueCard.classList.add('revealed');
+                revealedClues++;
+                
+                updateProgress();
+                
+                if (revealedClues >= 3) {
+                    document.getElementById('accuseBtn').disabled = false;
+                }
+            }
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const clueCount = document.getElementById('clueCount');
+            const percentage = (revealedClues / 6) * 100;
+            
+            progressBar.style.width = percentage + '%';
+            clueCount.textContent = revealedClues;
+        }
+
+        function selectSuspect(suspect) {
+            // Remove previous selection
+            document.querySelectorAll('.suspect-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selection to clicked suspect
+            event.target.closest('.suspect-card').classList.add('selected');
+            selectedSuspect = suspect;
+            
+            if (revealedClues >= 3) {
+                document.getElementById('accuseBtn').disabled = false;
+            }
+        }
+
+        function makeAccusation() {
+            if (!selectedSuspect) {
+                showCustomAlert("Please select a suspect first!");
+                return;
+            }
+            
+            const solutionSection = document.getElementById('solutionSection');
+            const solutionText = document.getElementById('solutionText');
+            
+            let solution = "";
+            
+            if (selectedSuspect === 'margaret') {
+                solution = `
+                    <h3 style="color: #ff6b6b;">🎯 Correct! Margaret Blackwood is the killer!</h3>
+                    <p><strong>The Method:</strong> Margaret used her botanical knowledge to drug her husband's tea with Valerian root, making him drowsy. She then suffocated him and used a thin wire to lock the door from outside, creating the illusion of suicide or natural death.</p>
+                    <p><strong>The Motive:</strong> She discovered her husband was planning to divorce her and change his will, leaving her with nothing. The hidden safe contained the new will that would have cut her off completely.</p>
+                    <p><strong>The Evidence:</strong> Her gardening boots left muddy prints, she had access to Valerian root from her herb garden, and she knew about the hidden safe behind the portrait.</p>
+                    <p style="color: #90EE90; font-weight: bold;">🏆 Congratulations, Detective! You've solved the mystery!</p>
+                `;
+            } else if (selectedSuspect === 'james') {
+                solution = `
+                    <h3 style="color: #ffd93d;">❌ Not quite right...</h3>
+                    <p>While James had motive (being written out of the will) and opportunity (keys to all rooms), the evidence doesn't point to him:</p>
+                    <ul>
+                        <li>The muddy footprints were size 8 - too small for James</li>
+                        <li>The Valerian root requires botanical knowledge he doesn't possess</li>
+                        <li>The locksmithing book suggests someone learning the technique, not someone with existing access</li>
+                    </ul>
+                    <p><strong>The real killer is Margaret Blackwood!</strong> Try again and look more carefully at the clues.</p>
+                `;
+            } else {
+                solution = `
+                    <h3 style="color: #ffd93d;">❌ Close, but not correct...</h3>
+                    <p>Victoria had the locksmithing knowledge and the right shoe size, but:</p>
+                    <ul>
+                        <li>She was estranged from the family and wouldn't know about the hidden safe</li>
+                        <li>She had no access to prepare the drugged tea</li>
+                        <li>The Valerian root points to someone with current botanical knowledge</li>
+                    </ul>
+                    <p><strong>The real killer is Margaret Blackwood!</strong> The grieving widow had means, motive, and opportunity.</p>
+                `;
+            }
+            
+            solutionText.innerHTML = solution;
+            solutionSection.classList.add('show');
+            solutionSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetMystery() {
+            revealedClues = 0;
+            selectedSuspect = null;
+            
+            // Reset clue cards
+            document.querySelectorAll('.clue-card').forEach(card => {
+                card.classList.remove('revealed');
+            });
+            
+            document.querySelectorAll('.hidden-clue').forEach(clue => {
+                clue.style.display = 'none';
+            });
+            
+            // Reset suspects
+            document.querySelectorAll('.suspect-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Reset UI
+            updateProgress();
+            document.getElementById('accuseBtn').disabled = true;
+            document.getElementById('solutionSection').classList.remove('show');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showCustomAlert(message) {
+            // Create custom alert overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            `;
+            
+            const alertBox = document.createElement('div');
+            alertBox.style.cssText = `
+                background: #1a1a2e;
+                padding: 2rem;
+                border-radius: 10px;
+                border: 2px solid #8b0000;
+                color: #e8e8e8;
+                text-align: center;
+                max-width: 400px;
+            `;
+            
+            alertBox.innerHTML = `
+                <p style="margin-bottom: 1rem;">${message}</p>
+                <button class="btn" onclick="this.closest('div').remove()">OK</button>
+            `;
+            
+            overlay.appendChild(alertBox);
+            document.body.appendChild(overlay);
+        }
+    </script>
+ </body>
+</html>
+
+

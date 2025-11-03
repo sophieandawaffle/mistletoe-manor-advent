@@ -94,15 +94,27 @@ export function PasswordGate({ calendar }: PasswordGateProps) {
         </div>
 
         {/* Login Form */}
-        <div className="w-full max-w-md bg-background/95 backdrop-blur-sm border border-border rounded-lg p-8 shadow-xl">
-          <h2 className="text-2xl font-bold text-center mb-2">Enter Your Details</h2>
-          <p className="text-muted-foreground text-center mb-6">
+        <div className={`w-full max-w-md backdrop-blur-sm border rounded-lg p-8 shadow-xl ${
+          calendar.id === "christmas-conspiracy"
+            ? "bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-slate-700/50"
+            : "bg-background/95 border-border"
+        }`}>
+          <h2 className={`text-2xl font-bold text-center mb-2 ${
+            calendar.id === "christmas-conspiracy" ? "text-slate-200" : ""
+          }`}>
+            Enter Your Details
+          </h2>
+          <p className={`text-center mb-6 ${
+            calendar.id === "christmas-conspiracy" ? "text-slate-400" : "text-muted-foreground"
+          }`}>
             Please enter your Etsy Order Confirmation Number to access your calendar
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="orderId" className="block text-sm font-medium mb-2">
+              <label htmlFor="orderId" className={`block text-sm font-medium mb-2 ${
+                calendar.id === "christmas-conspiracy" ? "text-slate-300" : ""
+              }`}>
                 Etsy Order Confirmation Number
               </label>
               <Input
@@ -120,15 +132,34 @@ export function PasswordGate({ calendar }: PasswordGateProps) {
                 minLength={8}
                 maxLength={12}
                 pattern="[0-9]{8,12}"
+                className={calendar.id === "christmas-conspiracy" 
+                  ? "bg-slate-800/50 border-slate-600/50 text-slate-200 placeholder:text-slate-500 focus:border-amber-400 focus:ring-amber-400/20" 
+                  : ""}
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className={`text-xs mt-1 ${
+                calendar.id === "christmas-conspiracy" ? "text-slate-500" : "text-muted-foreground"
+              }`}>
                 Must be 8-12 digits (numbers only)
               </p>
             </div>
 
-            {error && <div className="text-sm text-red-500 text-center">{error}</div>}
+            {error && (
+              <div className={`text-sm text-center ${
+                calendar.id === "christmas-conspiracy" ? "text-red-400" : "text-red-500"
+              }`}>
+                {error}
+              </div>
+            )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              className={`w-full ${
+                calendar.id === "christmas-conspiracy"
+                  ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white border-0"
+                  : ""
+              }`}
+              disabled={isLoading}
+            >
               {isLoading ? "Accessing Calendar..." : "Access Calendar"}
             </Button>
           </form>

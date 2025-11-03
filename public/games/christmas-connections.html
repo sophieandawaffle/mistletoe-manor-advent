@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christmas Connections</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .instructions-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+        }
+
+        .instructions-text {
+            font-size: 1.125rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .mistakes-counter {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #ef4444;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.5rem;
+        }
+
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .word-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            color: #f8fafc;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .word-card:hover {
+            background: rgba(51, 65, 85, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-color: rgba(148, 163, 184, 0.5);
+        }
+
+        .word-card.selected {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border-color: #991b1b;
+        }
+
+        .word-card.correct {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border-color: #15803d;
+            cursor: default;
+        }
+
+        .word-card.correct:hover {
+            transform: none;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-shuffle {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-shuffle:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-new-game {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-new-game:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .solved-groups {
+            margin-top: 2rem;
+        }
+
+        .solved-group {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .group-category {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .group-words {
+            font-size: 0.875rem;
+            opacity: 0.95;
+        }
+
+        .game-over {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.75rem;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .game-over.visible {
+            display: block;
+        }
+
+        .game-over.win {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .game-over h3 {
+            color: #ef4444;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .game-over.win h3 {
+            color: #22c55e;
+        }
+
+        .game-over p {
+            color: #cbd5e1;
+            font-size: 1.125rem;
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+        }
+
+        .feedback.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 2px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .feedback.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 2px solid rgba(34, 197, 94, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .word-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.5rem;
+            }
+
+            .word-card {
+                font-size: 0.7rem;
+                padding: 0.5rem 0.25rem;
+                min-height: 45px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-shuffle,
+            .btn-new-game,
+            .submit-button {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .word-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.375rem;
+            }
+
+            .word-card {
+                font-size: 0.65rem;
+                padding: 0.5rem 0.2rem;
+                min-height: 40px;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 21</div>
+    <h1 class="puzzle-title" id="gameTitle">🎄 Christmas Connections 🎄</h1>
+    <p class="mystery-subtitle">Find groups of 4 related Christmas words!</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <div class="instructions-section">
+     <p class="instructions-text" id="instructionsText">Find groups of 4 related Christmas words!</p>
+    </div>
+
+    <div class="mistakes-counter">
+     Mistakes: <span id="mistakeCount">0</span>/3
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="word-grid" id="wordGrid"></div>
+
+    <div class="controls">
+     <button class="btn-shuffle" id="shuffleBtn">🔀 Shuffle</button>
+     <button class="submit-button" id="submitBtn" disabled>Submit</button>
+     <button class="btn-new-game" id="newGameBtn">🎮 New Game</button>
+    </div>
+
+    <div class="solved-groups" id="solvedGroups"></div>
+
+    <div class="game-over" id="gameOver">
+     <h3 id="gameOverTitle"></h3>
+     <p id="gameOverMessage"></p>
+    </div>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        const gameData = {
+            groups: [
+                {
+                    category: "Things That Are Hung",
+                    words: ["STOCKINGS", "MISTLETOE", "ORNAMENTS", "GARLAND"],
+                    difficulty: 1
+                },
+                {
+                    category: "Words Before 'Christmas'",
+                    words: ["WHITE", "MERRY", "LAST", "BLUE"],
+                    difficulty: 2
+                },
+                {
+                    category: "Christmas Carol First Words",
+                    words: ["SILENT", "JINGLE", "DECK", "RUDOLPH"],
+                    difficulty: 3
+                },
+                {
+                    category: "Things With Stars",
+                    words: ["TREE", "SKY", "BETHLEHEM", "WISE"],
+                    difficulty: 4
+                }
+            ]
+        };
+
+        let gameState = {
+            selectedWords: [],
+            solvedGroups: [],
+            mistakes: 0,
+            gameOver: false,
+            allWords: []
+        };
+
+        function initializeGame() {
+            gameState.selectedWords = [];
+            gameState.solvedGroups = [];
+            gameState.mistakes = 0;
+            gameState.gameOver = false;
+            gameState.allWords = gameData.groups.flatMap(group => group.words);
+            
+            shuffleArray(gameState.allWords);
+            renderGame();
+            updateMistakeCounter();
+            hideGameOver();
+            hideFeedback();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function renderGame() {
+            const wordGrid = document.getElementById('wordGrid');
+            wordGrid.innerHTML = '';
+
+            const availableWords = gameState.allWords.filter(word => 
+                !gameState.solvedGroups.some(group => group.words.includes(word))
+            );
+
+            availableWords.forEach(word => {
+                const wordCard = document.createElement('div');
+                wordCard.className = 'word-card';
+                wordCard.textContent = word;
+                wordCard.addEventListener('click', () => selectWord(word, wordCard));
+                
+                // Check if this word is part of a solved group
+                const isSolved = gameState.solvedGroups.some(group => group.words.includes(word));
+                if (isSolved) {
+                    wordCard.classList.add('correct');
+                    wordCard.style.cursor = 'default';
+                }
+                
+                if (gameState.selectedWords.includes(word)) {
+                    wordCard.classList.add('selected');
+                }
+                
+                wordGrid.appendChild(wordCard);
+            });
+
+            renderSolvedGroups();
+            updateSubmitButton();
+        }
+
+        function selectWord(word, cardElement) {
+            if (gameState.gameOver) return;
+            
+            // Don't allow selecting words from solved groups
+            const isSolved = gameState.solvedGroups.some(group => group.words.includes(word));
+            if (isSolved) return;
+
+            const index = gameState.selectedWords.indexOf(word);
+            
+            if (index > -1) {
+                gameState.selectedWords.splice(index, 1);
+                cardElement.classList.remove('selected');
+            } else if (gameState.selectedWords.length < 4) {
+                gameState.selectedWords.push(word);
+                cardElement.classList.add('selected');
+            }
+            
+            updateSubmitButton();
+        }
+
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = gameState.selectedWords.length !== 4 || gameState.gameOver;
+        }
+
+        function submitGuess() {
+            if (gameState.selectedWords.length !== 4 || gameState.gameOver) return;
+
+            const matchingGroup = gameData.groups.find(group => 
+                gameState.selectedWords.every(word => group.words.includes(word)) &&
+                gameState.selectedWords.length === 4
+            );
+
+            if (matchingGroup) {
+                gameState.solvedGroups.push(matchingGroup);
+                gameState.selectedWords = [];
+                showFeedback(`Correct! ${matchingGroup.category}`, 'success');
+                createSuccessAnimation();
+                
+                if (gameState.solvedGroups.length === gameData.groups.length) {
+                    setTimeout(() => endGame(true), 1000);
+                }
+            } else {
+                gameState.mistakes++;
+                gameState.selectedWords = [];
+                showFeedback('Not quite right. Try again!', 'error');
+                updateMistakeCounter();
+                
+                if (gameState.mistakes >= 3) {
+                    setTimeout(() => endGame(false), 1000);
+                }
+            }
+            
+            renderGame();
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type} show`;
+            
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 2000);
+        }
+
+        function hideFeedback() {
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('show');
+        }
+
+        function updateMistakeCounter() {
+            document.getElementById('mistakeCount').textContent = gameState.mistakes;
+        }
+
+        function renderSolvedGroups() {
+            const solvedGroupsContainer = document.getElementById('solvedGroups');
+            solvedGroupsContainer.innerHTML = '';
+
+            gameState.solvedGroups.forEach(group => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'solved-group';
+                
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'group-category';
+                categoryDiv.textContent = group.category;
+                
+                const wordsDiv = document.createElement('div');
+                wordsDiv.className = 'group-words';
+                wordsDiv.textContent = group.words.join(', ');
+                
+                groupDiv.appendChild(categoryDiv);
+                groupDiv.appendChild(wordsDiv);
+                solvedGroupsContainer.appendChild(groupDiv);
+            });
+        }
+
+        function shuffleWords() {
+            if (gameState.gameOver) return;
+            
+            const availableWords = gameState.allWords.filter(word => 
+                !gameState.solvedGroups.some(group => group.words.includes(word))
+            );
+            
+            shuffleArray(availableWords);
+            
+            // Update the allWords array to maintain the new order
+            gameState.allWords = [
+                ...gameState.solvedGroups.flatMap(group => group.words),
+                ...availableWords
+            ];
+            
+            renderGame();
+        }
+
+        function endGame(won) {
+            gameState.gameOver = true;
+            const gameOverDiv = document.getElementById('gameOver');
+            const titleElement = document.getElementById('gameOverTitle');
+            const messageElement = document.getElementById('gameOverMessage');
+            
+            if (won) {
+                gameOverDiv.className = 'game-over win visible';
+                titleElement.textContent = '🎉 Congratulations! 🎉';
+                messageElement.textContent = 'You found all the Christmas connections!';
+            } else {
+                gameOverDiv.className = 'game-over visible';
+                titleElement.textContent = '🎄 Game Over 🎄';
+                messageElement.textContent = 'Better luck next time! The Christmas spirit is always with you.';
+            }
+            
+            createSuccessAnimation();
+        }
+
+        function hideGameOver() {
+            const gameOverDiv = document.getElementById('gameOver');
+            gameOverDiv.classList.remove('visible');
+            gameOverDiv.className = 'game-over';
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('submitBtn').addEventListener('click', submitGuess);
+            document.getElementById('shuffleBtn').addEventListener('click', shuffleWords);
+            document.getElementById('newGameBtn').addEventListener('click', initializeGame);
+
+            initializeGame();
+        });
+    </script>
+ </body>
+</html>
+

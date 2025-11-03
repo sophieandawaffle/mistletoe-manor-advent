@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Christmas Mystery Riddle Game</title>
+  <link rel="stylesheet" href="/games/design-system.css">
+  <style>
+        /* Game-specific styles only */
+        .welcome-section {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.25rem;
+            color: #22c55e;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .welcome-text {
+            font-size: 1rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .progress-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #475569;
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.completed {
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        }
+
+        .progress-dot.current {
+            background: #dc2626;
+            box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+            transform: scale(1.2);
+        }
+
+        .riddle-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .riddle-card.active {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .riddle-number {
+            font-size: 1.5rem;
+            color: #dc2626;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .riddle-text {
+            font-size: 1.25rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            color: #e2e8f0;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .answer-section {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .answer-input {
+            flex: 1;
+            min-width: 200px;
+            font-size: 1.125rem;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .hint-btn {
+            background: rgba(30, 41, 59, 0.6);
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.75rem;
+            font-family: inherit;
+        }
+
+        .hint-btn:hover {
+            background: rgba(51, 65, 85, 0.6);
+            color: #e2e8f0;
+            border-color: rgba(148, 163, 184, 0.5);
+        }
+
+        .hint {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 0.75rem;
+            color: #93c5fd;
+            font-size: 0.95rem;
+            display: none;
+            line-height: 1.6;
+        }
+
+        .hint.visible {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .feedback-message {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+            line-height: 1.6;
+        }
+
+        .feedback-message.correct {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid #22c55e;
+            color: #4ade80;
+            display: block;
+        }
+
+        .feedback-message.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            color: #f87171;
+            display: block;
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            border-radius: 1rem;
+            display: none;
+        }
+
+        .completion-screen.active {
+            display: block;
+            animation: celebrationPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes celebrationPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .completion-title {
+            font-size: 2.5rem;
+            color: #22c55e;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .completion-message {
+            font-size: 1.25rem;
+            line-height: 1.7;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .restart-btn:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .riddle-text {
+                font-size: 1.125rem;
+            }
+
+            .answer-section {
+                flex-direction: column;
+            }
+
+            .answer-input {
+                min-width: auto;
+            }
+
+            .completion-title {
+                font-size: 2rem;
+            }
+
+            .completion-message {
+                font-size: 1.125rem;
+            }
+        }
+    </style>
+ </head>
+ <body>
+  <div class="container">
+   <!-- Animated snowflakes -->
+   <div class="snowflake" style="left: 10%; animation-duration: 3s; animation-delay: 0s;">❄</div>
+   <div class="snowflake" style="left: 20%; animation-duration: 4s; animation-delay: 1s;">❅</div>
+   <div class="snowflake" style="left: 30%; animation-duration: 3.5s; animation-delay: 0.5s;">❄</div>
+   <div class="snowflake" style="left: 40%; animation-duration: 5s; animation-delay: 1.8s;">❅</div>
+   <div class="snowflake" style="left: 50%; animation-duration: 3.2s; animation-delay: 1s;">❄</div>
+   <div class="snowflake" style="left: 60%; animation-duration: 4.5s; animation-delay: 2s;">❅</div>
+   <div class="snowflake" style="left: 70%; animation-duration: 3.8s; animation-delay: 0.2s;">❄</div>
+   <div class="snowflake" style="left: 80%; animation-duration: 4.2s; animation-delay: 1.5s;">❅</div>
+   <div class="snowflake" style="left: 90%; animation-duration: 3.6s; animation-delay: 0.8s;">❄</div>
+
+   <header class="advent-header">
+    <div class="day-badge">Day 17</div>
+    <h1 class="puzzle-title" id="gameTitle">🎄 Christmas Mystery Riddle Game 🎄</h1>
+    <p class="mystery-subtitle">Help Santa Find His Missing Reindeer!</p>
+   </header>
+
+   <main class="puzzle-container" style="max-width: 900px; width: 100%;">
+    <div class="welcome-section">
+     <p class="welcome-text" id="welcomeMessage">Santa's reindeer have gone missing just days before Christmas! Solve these festive riddles to discover where each reindeer is hiding. Can you help save Christmas?</p>
+    </div>
+
+    <div class="progress-container" id="progress">
+     <!-- Progress dots will be generated by JavaScript -->
+    </div>
+
+    <div class="game-area" id="gameArea">
+     <!-- Riddle cards will be generated here -->
+    </div>
+
+    <div class="completion-screen" id="completionScreen">
+     <h2 class="completion-title">🎉 Congratulations! 🎉</h2>
+     <p class="completion-message" id="completionMessage">You've found all of Santa's reindeer! Thanks to your brilliant detective work, Christmas is saved! The reindeer are back at the North Pole, ready to deliver presents around the world. Ho ho ho!</p>
+     <button class="restart-btn" id="restartBtn">Play Again 🎄</button>
+    </div>
+   </main>
+
+   <div class="success-animation" id="successAnimation"></div>
+  </div>
+
+  <script>
+        const riddles = [
+            {
+                number: "Riddle 1",
+                text: "🦌 Dasher loves to race through the sky, but now he's hiding where cookies are baked and milk is warmed. Where stockings hang and fires burn bright, this reindeer waits for Christmas night.",
+                answer: "kitchen",
+                hint: "Think about where families gather to prepare Christmas treats and warm drinks.",
+                feedback: "Correct! Dasher was hiding in the kitchen, probably hoping for some fresh-baked cookies!"
+            },
+            {
+                number: "Riddle 2", 
+                text: "🦌 Dancer spins and twirls with glee, now she's hiding where you sleep peacefully. Under covers soft and warm, she waits out the winter storm.",
+                answer: "bedroom",
+                hint: "Where do you go when it's time to rest and dream of Christmas morning?",
+                feedback: "Well done! Dancer was taking a cozy nap in the bedroom, dreaming of Christmas Eve flights!"
+            },
+            {
+                number: "Riddle 3",
+                text: "🦌 Prancer loves to show off his moves, but he's hiding where the family grooves. With cushions soft and a screen so bright, he watches Christmas movies all night.",
+                answer: "living room",
+                hint: "This is where families gather to watch holiday movies and relax together.",
+                feedback: "Excellent! Prancer was in the living room, probably watching 'Rudolph the Red-Nosed Reindeer'!"
+            },
+            {
+                number: "Riddle 4",
+                text: "🦌 Vixen is clever and loves to play, she's hiding where books are kept all day. With stories of Christmas and tales so old, her hiding spot is worth more than gold.",
+                answer: "library",
+                hint: "Where would you find shelves full of Christmas stories and holiday tales?",
+                feedback: "Brilliant! Vixen was in the library, reading all the Christmas stories she could find!"
+            },
+            {
+                number: "Riddle 5",
+                text: "🦌 Comet shoots across the night, but he's hiding where stars shine bright. On the roof where Santa lands, this reindeer makes his final stand.",
+                answer: "rooftop",
+                hint: "Where does Santa traditionally land when he visits houses on Christmas Eve?",
+                feedback: "Perfect! Comet was on the rooftop, practicing his landing for Christmas Eve!"
+            }
+        ];
+
+        let currentRiddle = 0;
+
+        function generateProgressDots() {
+            const progressContainer = document.getElementById('progress');
+            progressContainer.innerHTML = '';
+            
+            riddles.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = `progress-dot ${index === 0 ? 'current' : ''}`;
+                progressContainer.appendChild(dot);
+            });
+        }
+
+        function generateRiddleCards() {
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = '';
+
+            riddles.forEach((riddle, index) => {
+                const card = document.createElement('div');
+                card.className = `riddle-card ${index === 0 ? 'active' : ''}`;
+                card.id = `riddle-${index}`;
+                
+                card.innerHTML = `
+                    <div class="riddle-number">${riddle.number}</div>
+                    <div class="riddle-text">${riddle.text}</div>
+                    <div class="answer-section">
+                        <input type="text" class="solution-input answer-input" id="answer-${index}" placeholder="Enter your answer..." autocomplete="off">
+                        <button class="submit-button submit-btn" id="submit-${index}">Submit</button>
+                    </div>
+                    <button class="hint-btn" id="hint-btn-${index}">Need a hint? 💡</button>
+                    <div class="hint" id="hint-${index}">${riddle.hint}</div>
+                    <div class="feedback-message" id="feedback-${index}"></div>
+                `;
+                
+                gameArea.appendChild(card);
+            });
+
+            // Add event listeners
+            riddles.forEach((_, index) => {
+                document.getElementById(`submit-${index}`).addEventListener('click', () => checkAnswer(index));
+                document.getElementById(`hint-btn-${index}`).addEventListener('click', () => showHint(index));
+                document.getElementById(`answer-${index}`).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        checkAnswer(index);
+                    }
+                });
+            });
+        }
+
+        function showHint(riddleIndex) {
+            const hint = document.getElementById(`hint-${riddleIndex}`);
+            hint.classList.add('visible');
+        }
+
+        function checkAnswer(riddleIndex) {
+            const input = document.getElementById(`answer-${riddleIndex}`);
+            const feedback = document.getElementById(`feedback-${riddleIndex}`);
+            const userAnswer = input.value.toLowerCase().trim();
+            const correctAnswer = riddles[riddleIndex].answer.toLowerCase();
+
+            if (userAnswer === correctAnswer) {
+                feedback.textContent = riddles[riddleIndex].feedback;
+                feedback.className = 'feedback-message correct';
+                
+                // Update progress
+                const progressDots = document.querySelectorAll('.progress-dot');
+                progressDots[riddleIndex].classList.remove('current');
+                progressDots[riddleIndex].classList.add('completed');
+                
+                // Disable input and button
+                input.disabled = true;
+                const submitBtn = document.getElementById(`submit-${riddleIndex}`);
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Solved! ✅';
+                
+                createSuccessAnimation();
+                
+                // Move to next riddle or complete game
+                setTimeout(() => {
+                    if (riddleIndex < riddles.length - 1) {
+                        nextRiddle(riddleIndex);
+                    } else {
+                        completeGame();
+                    }
+                }, 2000);
+                
+            } else {
+                feedback.textContent = "Not quite right! Try again. 🤔";
+                feedback.className = 'feedback-message incorrect';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function nextRiddle(currentIndex) {
+            const currentCard = document.getElementById(`riddle-${currentIndex}`);
+            const nextCard = document.getElementById(`riddle-${currentIndex + 1}`);
+            const progressDots = document.querySelectorAll('.progress-dot');
+            
+            currentCard.classList.remove('active');
+            nextCard.classList.add('active');
+            
+            if (currentIndex + 1 < progressDots.length) {
+                progressDots[currentIndex + 1].classList.add('current');
+            }
+            
+            // Focus on next input
+            const nextInput = document.getElementById(`answer-${currentIndex + 1}`);
+            nextInput.focus();
+            
+            currentRiddle = currentIndex + 1;
+        }
+
+        function completeGame() {
+            const gameArea = document.getElementById('gameArea');
+            const completionScreen = document.getElementById('completionScreen');
+            const progress = document.getElementById('progress');
+            
+            gameArea.style.display = 'none';
+            progress.style.display = 'none';
+            completionScreen.classList.add('active');
+            createSuccessAnimation();
+        }
+
+        function restartGame() {
+            currentRiddle = 0;
+            
+            // Reset progress dots
+            const progressDots = document.querySelectorAll('.progress-dot');
+            progressDots.forEach((dot, index) => {
+                dot.classList.remove('completed', 'current');
+                if (index === 0) {
+                    dot.classList.add('current');
+                }
+            });
+            
+            // Hide completion screen and show game area
+            const gameArea = document.getElementById('gameArea');
+            const completionScreen = document.getElementById('completionScreen');
+            const progress = document.getElementById('progress');
+            
+            completionScreen.classList.remove('active');
+            gameArea.style.display = 'block';
+            progress.style.display = 'flex';
+            
+            // Regenerate riddle cards
+            generateRiddleCards();
+            
+            // Focus on first input
+            setTimeout(() => {
+                document.getElementById('answer-0').focus();
+            }, 300);
+        }
+
+        function createSuccessAnimation() {
+            const animation = document.getElementById('successAnimation');
+            const colors = ['#fbbf24', '#f59e0b', '#d97706', '#92400e'];
+            
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'success-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = '100%';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDelay = Math.random() * 0.5 + 's';
+                    
+                    animation.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            generateProgressDots();
+            generateRiddleCards();
+            document.getElementById('restartBtn').addEventListener('click', restartGame);
+            
+            // Focus on first input
+            setTimeout(() => {
+                document.getElementById('answer-0').focus();
+            }, 500);
+        });
+    </script>
+ </body>
+</html>
+
