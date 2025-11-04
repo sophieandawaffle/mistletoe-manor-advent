@@ -100,7 +100,11 @@ export function CalendarView({ calendar, orderId }: CalendarViewProps) {
 
       <div className="relative z-10">
         {/* Header */}
-        <header className="text-center relative pt-4">
+        <header className={`text-center relative ${
+          calendar.id === "christmas-conspiracy"
+            ? "pt-16 sm:pt-12 md:pt-8"
+            : "pt-4"
+        }`}>
           <div className="flex justify-center items-center">
             <div className="w-full max-w-xs md:max-w-2xl">
               <Image
