@@ -6,7 +6,6 @@ import { DayModal } from "./day-modal"
 import { CountdownModal } from "./countdown-modal"
 import { getDayContent, isDayUnlocked } from "@/lib/advent-data"
 import type { DayContent } from "@/lib/advent-data"
-import { useIsMobile } from "@/hooks/use-mobile"
 
 interface AdventCalendarProps {
   calendarId: string
@@ -57,7 +56,6 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
   const [selectedDay, setSelectedDay] = useState<DayContent | null>(null)
   const [countdownDay, setCountdownDay] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const isMobile = useIsMobile()
 
   // Load progress from Supabase on mount
   useEffect(() => {
@@ -126,31 +124,9 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
 
   return (
     <>
-      {isMobile ? (
-        // Mobile: Grid layout (invisible grid for positioning)
-        <div className="w-full">
-          <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto p-4">
-            {Array.from({ length: 24 }, (_, i) => i + 1).map((day) => {
-              const content = getDayContent(day, calendarId)
-              return (
-                <AdventDoor
-                  key={day}
-                  day={day}
-                  isUnlocked={isDayUnlocked(day, unlockAll)}
-                  isOpened={openedDays.has(day)}
-                  position={null} // No position needed for mobile grid
-                  doorImageUrl={content?.doorImageUrl || ""}
-                  onClick={() => handleDoorClick(day)}
-                  isMobile={true}
-                  calendarId={calendarId}
-                />
-              )
-            })}
-          </div>
-        </div>
-      ) : (
-        // Desktop: Absolute positioning
-        <div className="relative w-full h-[100vh] sm:h-[100vh] md:min-h-[70vh]">
+      {/* Mobile: Grid layout - shown only on mobile via CSS */}
+      <div className="w-full md:hidden">
+        <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto p-4">
           {Array.from({ length: 24 }, (_, i) => i + 1).map((day) => {
             const content = getDayContent(day, calendarId)
             return (
@@ -159,16 +135,36 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
                 day={day}
                 isUnlocked={isDayUnlocked(day, unlockAll)}
                 isOpened={openedDays.has(day)}
-                position={doorPositions[day - 1]}
+                position={null} // No position needed for mobile grid
                 doorImageUrl={content?.doorImageUrl || ""}
                 onClick={() => handleDoorClick(day)}
-                isMobile={false}
+                isMobile={true}
                 calendarId={calendarId}
               />
             )
           })}
         </div>
-      )}
+      </div>
+
+      {/* Desktop: Absolute positioning - shown only on desktop via CSS */}
+      <div className="hidden md:block relative w-full h-[100vh] sm:h-[100vh] md:min-h-[70vh]">
+        {Array.from({ length: 24 }, (_, i) => i + 1).map((day) => {
+          const content = getDayContent(day, calendarId)
+          return (
+            <AdventDoor
+              key={day}
+              day={day}
+              isUnlocked={isDayUnlocked(day, unlockAll)}
+              isOpened={openedDays.has(day)}
+              position={doorPositions[day - 1]}
+              doorImageUrl={content?.doorImageUrl || ""}
+              onClick={() => handleDoorClick(day)}
+              isMobile={false}
+              calendarId={calendarId}
+            />
+          )
+        })}
+      </div>
 
       {selectedDay && <DayModal content={selectedDay} onClose={() => setSelectedDay(null)} />}
       {countdownDay && <CountdownModal day={countdownDay} onClose={() => setCountdownDay(null)} />}

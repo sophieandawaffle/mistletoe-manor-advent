@@ -15,19 +15,19 @@ export function DayModal({ content, onClose }: DayModalProps) {
         className="relative w-full max-w-5xl rounded-lg sm:rounded-xl shadow-2xl border-2 border-border transform-none flex flex-col mt-14 sm:mt-0" 
         style={{ 
           background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
-          maxHeight: 'calc(100vh - 3.5rem)',
-          height: 'calc(100vh - 3.5rem)'
+          maxHeight: 'calc(100vh - 2rem)',
+          height: 'calc(100vh - 2rem)'
         }}
       >
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-[70] text-slate-300 hover:text-white transition-colors bg-slate-900/80 rounded-full p-2 hover:bg-slate-800/90 backdrop-blur-sm"
+          className="absolute top-16 right-2 sm:top-4 sm:right-4 z-[70] text-slate-300 hover:text-white transition-colors bg-slate-900/80 rounded-full p-1.5 sm:p-2 hover:bg-slate-800/90 backdrop-blur-sm"
           aria-label="Close modal"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
 
-        <div className="flex-1 flex flex-col overflow-hidden p-2 sm:p-4 md:p-6 pt-8 sm:pt-10 md:pt-12">
+        <div className="flex-1 flex flex-col overflow-hidden p-1 sm:p-4 md:p-6 pt-12 sm:pt-10 md:pt-12">
           {content.interactiveUrl ? (
             // Show interactive content in iframe (responsive height)
             <div className="relative w-full flex-1 min-h-0">
