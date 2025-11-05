@@ -3,11 +3,31 @@ import { getCalendarBySlug } from "@/lib/calendars/calendar-config"
 import { CalendarView } from "@/components/calendar-view"
 import { PasswordGate } from "@/components/password-gate"
 import { cookies } from "next/headers"
+import type { Metadata } from "next"
 
 interface CalendarPageProps {
   params: Promise<{
     calendarSlug: string
   }>
+}
+
+export async function generateMetadata({ params }: CalendarPageProps): Promise<Metadata> {
+  const { calendarSlug } = await params
+  const calendar = getCalendarBySlug(calendarSlug)
+
+  if (!calendar) {
+    return {
+      title: "Calendar Not Found | CosyClueCo",
+    }
+  }
+
+  return {
+    title: `${calendar.name} | CosyClueCo Advent Calendar`,
+    description: calendar.description,
+    icons: {
+      icon: "/images/cosy-clue-co-logo.svg",
+    },
+  }
 }
 
 export default async function CalendarPage({ params }: CalendarPageProps) {

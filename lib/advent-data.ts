@@ -763,11 +763,35 @@ const generateSudokuChristmasData = (): DayContent[] => {
   })
 }
 
+// Generate A Very Crossword Christmas data
+const generateCrosswordChristmasData = (): DayContent[] => {
+  return Array.from({ length: 24 }, (_, i) => {
+    const day = i + 1
+
+    return {
+      day,
+      title: `Day ${day}: Crossword Challenge`,
+      storyText: `This is placeholder text for Day ${day}. Embed codes for crossword puzzles will be added shortly.`,
+      illustrationUrl: `/placeholder.svg?height=400&width=600&query=crossword Christmas illustration day ${day}`,
+      clueCardUrl: `/placeholder.svg?height=300&width=400&query=crossword clue card day ${day}`,
+      doorImageUrl: `/images/doors/door-${day}.svg`,
+      puzzle:
+        day % 3 === 0
+          ? {
+              type: "reveal",
+              revealText: "Tap to reveal the hidden crossword clue...",
+            }
+          : undefined,
+    }
+  })
+}
+
 // Store all calendar data
 const calendarData: CalendarData = {
   "murder-mistletoe-manor": generateMistletoeManorData(),
   "christmas-conspiracy": generateChristmasConspiracyData(),
   "a-very-sudoku-christmas": generateSudokuChristmasData(),
+  "a-very-crossword-christmas": generateCrosswordChristmasData(),
 }
 
 export function getDayContent(day: number, calendarId: string): DayContent | undefined {

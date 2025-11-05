@@ -53,6 +53,19 @@ export const calendars: Record<string, CalendarConfig> = {
       accent: "hsl(var(--accent))",
     },
   },
+  "a-very-crossword-christmas": {
+    id: "a-very-crossword-christmas",
+    name: "A Very Crossword Christmas",
+    slug: "a-very-crossword-christmas",
+    description: "A festive crossword advent calendar",
+    heroImage: "/board%20(1).svg",
+    backgroundColor: "bg-[url('/sudoku_background.svg')]",
+    theme: {
+      primary: "hsl(var(--primary))",
+      secondary: "hsl(var(--secondary))",
+      accent: "hsl(var(--accent))",
+    },
+  },
 }
 
 export function getCalendarBySlug(slug: string): CalendarConfig | null {
