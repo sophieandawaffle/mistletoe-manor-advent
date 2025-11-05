@@ -42,25 +42,56 @@
    <!-- Include the CryptoJS library for hashing the user id before sending it to the PuzzleMe server. -->
    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
-   <!-- Include the javascript library for embedding this puzzle. -->
-   <script id="pm-script" src="https://puzzleme.amuselabs.com/pmm/js/puzzleme-embed.js"></script>
-
-   <!-- Specify the Amuse Labs server name from where the puzzles will be served and trigger the embed flow. -->
+   <!-- Initialize PM_Config BEFORE loading the PuzzleMe script -->
    <script>
+       // Initialize PM_Config object if it doesn't exist
+       window.PM_Config = window.PM_Config || {};
        PM_Config.PM_BasePath = "https://puzzleme.amuselabs.com/pmm/";
        
-       // Configure PuzzleMe for responsive layout
-       if (typeof PM_Config !== 'undefined') {
-           // Ensure desktop layout on desktop screens
-           if (window.innerWidth >= 768) {
-               PM_Config.PM_UseDesktopLayout = true;
-           } else {
-               // Ensure mobile layout on mobile screens
-               PM_Config.PM_UseMobileLayout = true;
+       // More reliable mobile detection
+       function detectMobile() {
+           // Check if we're in an iframe and can access parent
+           let width = window.innerWidth;
+           try {
+               // Try to get parent window width if accessible
+               if (window.parent && window.parent !== window) {
+                   width = window.parent.innerWidth;
+               }
+           } catch (e) {
+               // Cross-origin restriction, use iframe width
+               width = window.innerWidth;
            }
+           
+           // Also check user agent for mobile devices
+           const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+           
+           // Use mobile layout if width < 768 OR if mobile user agent
+           return width < 768 || isMobileUserAgent;
        }
+       
+       // Set mobile layout BEFORE PuzzleMe script loads
+       if (detectMobile()) {
+           PM_Config.PM_UseMobileLayout = true;
+           PM_Config.PM_UseDesktopLayout = false;
+       } else {
+           PM_Config.PM_UseDesktopLayout = true;
+           PM_Config.PM_UseMobileLayout = false;
+       }
+       
+       // Also handle resize/orientation events
+       window.addEventListener('resize', function() {
+           if (detectMobile()) {
+               PM_Config.PM_UseMobileLayout = true;
+               PM_Config.PM_UseDesktopLayout = false;
+           } else {
+               PM_Config.PM_UseDesktopLayout = true;
+               PM_Config.PM_UseMobileLayout = false;
+           }
+       });
    </script>
 
+   <!-- Include the javascript library for embedding this puzzle. -->
+   <script id="pm-script" src="https://puzzleme.amuselabs.com/pmm/js/puzzleme-embed.js"></script>
    <!-- Specifies the puzzle to be embedded on the page. -->
    <div class="pm-embed-div" 
         data-id="day-10" 

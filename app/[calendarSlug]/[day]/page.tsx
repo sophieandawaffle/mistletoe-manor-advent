@@ -46,64 +46,33 @@ export default async function DayPage({ params }: DayPageProps) {
     notFound()
   }
 
-  // Only show sudoku puzzles on this page
+  // Only show sudoku puzzles on this page, or Christmas Conspiracy days
   const isSudoku = calendar.id === "a-very-sudoku-christmas"
+  const isChristmasConspiracy = calendar.id === "christmas-conspiracy"
   
-  if (!isSudoku || !content.interactiveUrl) {
+  if ((!isSudoku && !isChristmasConspiracy) || !content.interactiveUrl) {
     notFound()
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* Back button */}
-        <Link
-          href={`/${calendarSlug}`}
-          className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors mb-6"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back to Calendar</span>
-        </Link>
+    <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Back button - positioned as overlay */}
+      <Link
+        href={`/${calendarSlug}`}
+        className="absolute top-4 left-4 z-10 inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors bg-slate-900/80 backdrop-blur-sm rounded-lg px-3 py-2"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>Back to Calendar</span>
+      </Link>
 
-        {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">
-          {content.title}
-        </h1>
-
-        {/* Story text if available */}
-        {content.storyText && (
-          <p className="text-slate-300 mb-8 max-w-3xl">
-            {content.storyText}
-          </p>
-        )}
-
-        {/* Sudoku puzzle */}
-        <div className="w-full max-w-6xl mx-auto">
-          <style dangerouslySetInnerHTML={{__html: `
-            .sudoku-day-container {
-              width: calc(100vw - 2rem);
-              height: calc((100vw - 2rem) * 1.33);
-              max-height: calc((100vw - 2rem) * 1.33);
-            }
-            @media (min-width: 768px) {
-              .sudoku-day-container {
-                width: min(calc(100vw - 4rem), calc(100vh - 4rem));
-                height: calc(min(calc(100vw - 4rem), calc(100vh - 4rem)) * 0.67);
-                max-width: min(calc(100vw - 4rem), calc(100vh - 4rem));
-                max-height: calc(min(calc(100vw - 4rem), calc(100vh - 4rem)) * 0.67);
-              }
-            }
-          `}} />
-          <div className="sudoku-day-container relative mx-auto">
-            <iframe
-              src={content.interactiveUrl}
-              className="w-full h-full border-0 rounded-lg"
-              title={`Day ${dayNum} sudoku puzzle`}
-              allowFullScreen
-              scrolling="no"
-            />
-          </div>
-        </div>
+      {/* Interactive game/puzzle - full page with mobile padding */}
+      <div className="w-full h-full pt-16 md:pt-0">
+        <iframe
+          src={content.interactiveUrl}
+          className="w-full h-full border-0"
+          title={`Day ${dayNum} ${isSudoku ? 'sudoku puzzle' : 'game'}`}
+          allowFullScreen
+        />
       </div>
     </div>
   )

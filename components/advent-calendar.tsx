@@ -60,7 +60,12 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
   const [isLoading, setIsLoading] = useState(true)
   
   // Get calendar slug for navigation
-  const calendarSlug = calendarId === "a-very-sudoku-christmas" ? "a-very-sudoku-christmas" : null
+  const getCalendarSlug = () => {
+    if (calendarId === "a-very-sudoku-christmas") return "a-very-sudoku-christmas"
+    if (calendarId === "christmas-conspiracy") return "christmas-conspiracy"
+    return null
+  }
+  const calendarSlug = getCalendarSlug()
 
   // Load progress from Supabase on mount
   useEffect(() => {
@@ -122,6 +127,13 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
 
     // For sudoku calendar, navigate to day page instead of opening modal
     if (calendarId === "a-very-sudoku-christmas" && calendarSlug) {
+      setOpenedDays((prev) => new Set(prev).add(day))
+      router.push(`/${calendarSlug}/${day}`)
+      return
+    }
+
+    // For Christmas Conspiracy calendar, navigate to day page instead of opening modal
+    if (calendarId === "christmas-conspiracy" && calendarSlug) {
       setOpenedDays((prev) => new Set(prev).add(day))
       router.push(`/${calendarSlug}/${day}`)
       return
