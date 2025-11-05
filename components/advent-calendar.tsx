@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { AdventDoor } from "./advent-door"
 import { DayModal } from "./day-modal"
 import { CountdownModal } from "./countdown-modal"
@@ -52,10 +53,14 @@ const doorPositions = [
 ]
 
 export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalendarProps) {
+  const router = useRouter()
   const [openedDays, setOpenedDays] = useState<Set<number>>(new Set())
   const [selectedDay, setSelectedDay] = useState<DayContent | null>(null)
   const [countdownDay, setCountdownDay] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  
+  // Get calendar slug for navigation
+  const calendarSlug = calendarId === "a-very-sudoku-christmas" ? "a-very-sudoku-christmas" : null
 
   // Load progress from Supabase on mount
   useEffect(() => {
@@ -115,6 +120,13 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
       return
     }
 
+    // For sudoku calendar, navigate to day page instead of opening modal
+    if (calendarId === "a-very-sudoku-christmas" && calendarSlug) {
+      setOpenedDays((prev) => new Set(prev).add(day))
+      router.push(`/${calendarSlug}/${day}`)
+      return
+    }
+
     const content = getDayContent(day, calendarId)
     if (content) {
       setSelectedDay(content)
@@ -166,7 +178,7 @@ export function AdventCalendar({ calendarId, unlockAll, orderId }: AdventCalenda
         })}
       </div>
 
-      {selectedDay && <DayModal content={selectedDay} onClose={() => setSelectedDay(null)} />}
+      {selectedDay && <DayModal content={selectedDay} onClose={() => setSelectedDay(null)} calendarId={calendarId} />}
       {countdownDay && <CountdownModal day={countdownDay} onClose={() => setCountdownDay(null)} />}
     </>
   )
