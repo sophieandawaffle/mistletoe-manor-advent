@@ -40,6 +40,19 @@ export const calendars: Record<string, CalendarConfig> = {
       accent: "hsl(var(--accent))",
     },
   },
+  "a-very-sudoku-christmas": {
+    id: "a-very-sudoku-christmas",
+    name: "A Very Sudoku Christmas",
+    slug: "a-very-sudoku-christmas",
+    description: "A festive sudoku advent calendar",
+    heroImage: "/board.svg",
+    backgroundColor: "bg-[url('/sudoku_background.svg')]",
+    theme: {
+      primary: "hsl(var(--primary))",
+      secondary: "hsl(var(--secondary))",
+      accent: "hsl(var(--accent))",
+    },
+  },
 }
 
 export function getCalendarBySlug(slug: string): CalendarConfig | null {

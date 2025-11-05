@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku Day 17</title>
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .puzzle-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pm-embed-div {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+ </head>
+ <body>
+  <div class="puzzle-wrapper">
+   <!-- Include the CryptoJS library for hashing the user id before sending it to the PuzzleMe server. -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+   <!-- Include the javascript library for embedding this puzzle. -->
+   <script id="pm-script" src="https://puzzleme.amuselabs.com/pmm/js/puzzleme-embed.js"></script>
+
+   <!-- Specify the Amuse Labs server name from where the puzzles will be served and trigger the embed flow. -->
+   <script>
+       PM_Config.PM_BasePath = "https://puzzleme.amuselabs.com/pmm/";
+       
+       // Configure PuzzleMe for responsive layout
+       if (typeof PM_Config !== 'undefined') {
+           // Ensure desktop layout on desktop screens
+           if (window.innerWidth >= 768) {
+               PM_Config.PM_UseDesktopLayout = true;
+           } else {
+               // Ensure mobile layout on mobile screens
+               PM_Config.PM_UseMobileLayout = true;
+           }
+       }
+   </script>
+
+   <!-- Specifies the puzzle to be embedded on the page. -->
+   <div class="pm-embed-div" 
+        data-id="day-17" 
+        data-set="ad57d9a373258cf5eb458bc3c5cc80ecc758077147d994d242052c56016b29e5" 
+        data-puzzleType="sudoku" 
+        data-height="100%" 
+        data-mobileHeight="100%"
+        data-mobileMargin="0px"></div>
+  </div>
+ </body>
+</html>

@@ -428,10 +428,346 @@ const generateChristmasConspiracyData = (): DayContent[] => {
   })
 }
 
+// Generate A Very Sudoku Christmas data
+const generateSudokuChristmasData = (): DayContent[] => {
+  return Array.from({ length: 24 }, (_, i) => {
+    const day = i + 1
+
+    // Day 1 uses the PuzzleMe sudoku embed
+    if (day === 1) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Welcome to your first sudoku challenge! Use your logic and number skills to complete this festive puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-1.html`, // Interactive sudoku puzzle for day 1
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/1.svg`,
+      }
+    }
+
+    // Day 2 uses the PuzzleMe sudoku embed
+    if (day === 2) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Continue your sudoku journey! Solve this festive puzzle to unlock the next clue.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-2.html`, // Interactive sudoku puzzle for day 2
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/2.svg`,
+      }
+    }
+
+    // Day 3 uses the PuzzleMe sudoku embed
+    if (day === 3) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Keep the momentum going! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-3.html`, // Interactive sudoku puzzle for day 3
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/3.svg`,
+      }
+    }
+
+    // Day 4 uses the PuzzleMe sudoku embed
+    if (day === 4) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `You're making great progress! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-4.html`, // Interactive sudoku puzzle for day 4
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/4.svg`,
+      }
+    }
+
+    // Day 5 uses the PuzzleMe sudoku embed
+    if (day === 5) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Halfway through the first week! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-5.html`, // Interactive sudoku puzzle for day 5
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/5.svg`,
+      }
+    }
+
+    // Day 6 uses the PuzzleMe sudoku embed
+    if (day === 6) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Keep up the festive spirit! Solve this sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-6.html`, // Interactive sudoku puzzle for day 6
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/6.svg`,
+      }
+    }
+
+    // Day 7 uses the PuzzleMe sudoku embed
+    if (day === 7) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `One week down! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-7.html`, // Interactive sudoku puzzle for day 7
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/7.svg`,
+      }
+    }
+
+    // Day 8 uses the PuzzleMe sudoku embed
+    if (day === 8) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Keep the festive puzzle solving going! Solve this sudoku challenge.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-8.html`, // Interactive sudoku puzzle for day 8
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/8.svg`,
+      }
+    }
+
+    // Day 9 uses the PuzzleMe sudoku embed
+    if (day === 9) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `You're doing great! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-9.html`, // Interactive sudoku puzzle for day 9
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/9.svg`,
+      }
+    }
+
+    // Day 10 uses the PuzzleMe sudoku embed
+    if (day === 10) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Double digits! You're making fantastic progress. Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-10.html`, // Interactive sudoku puzzle for day 10
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 11 uses the PuzzleMe sudoku embed
+    if (day === 11) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Keep the festive puzzle solving momentum going! Solve this sudoku challenge.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-11.html`, // Interactive sudoku puzzle for day 11
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 12 uses the PuzzleMe sudoku embed
+    if (day === 12) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Halfway through your advent journey! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-12.html`, // Interactive sudoku puzzle for day 12
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 13 uses the PuzzleMe sudoku embed
+    if (day === 13) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `You're past the halfway point! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-13.html`, // Interactive sudoku puzzle for day 13
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 14 uses the PuzzleMe sudoku embed
+    if (day === 14) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Two weeks of festive puzzle solving! Solve this sudoku challenge.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-14.html`, // Interactive sudoku puzzle for day 14
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 15 uses the PuzzleMe sudoku embed
+    if (day === 15) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `You're in the final stretch! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-15.html`, // Interactive sudoku puzzle for day 15
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 16 uses the PuzzleMe sudoku embed
+    if (day === 16) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Only 8 days left! Keep up the festive puzzle solving.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-16.html`, // Interactive sudoku puzzle for day 16
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 17 uses the PuzzleMe sudoku embed
+    if (day === 17) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `You're almost there! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-17.html`, // Interactive sudoku puzzle for day 17
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 18 uses the PuzzleMe sudoku embed
+    if (day === 18) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Only 6 days to go! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-18.html`, // Interactive sudoku puzzle for day 18
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 19 uses the PuzzleMe sudoku embed
+    if (day === 19) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Almost at the finish line! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-19.html`, // Interactive sudoku puzzle for day 19
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 20 uses the PuzzleMe sudoku embed
+    if (day === 20) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Only 4 days remaining! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-20.html`, // Interactive sudoku puzzle for day 20
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 21 uses the PuzzleMe sudoku embed
+    if (day === 21) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Just 3 days left! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-21.html`, // Interactive sudoku puzzle for day 21
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 22 uses the PuzzleMe sudoku embed
+    if (day === 22) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `Only 2 days to go! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-22.html`, // Interactive sudoku puzzle for day 22
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 23 uses the PuzzleMe sudoku embed
+    if (day === 23) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `One final day after this! Solve this festive sudoku puzzle.`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-23.html`, // Interactive sudoku puzzle for day 23
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    // Day 24 uses the PuzzleMe sudoku embed
+    if (day === 24) {
+      return {
+        day,
+        title: `Day ${day}: Sudoku Challenge`,
+        storyText: `The final puzzle! Congratulations on completing your festive sudoku journey!`,
+        illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`, // Fallback if iframe doesn't load
+        interactiveUrl: `/games/sudoku-day-24.html`, // Interactive sudoku puzzle for day 24
+        clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+        doorImageUrl: `/images/doors/door-${day}.svg`,
+      }
+    }
+
+    return {
+      day,
+      title: `Day ${day}: Sudoku Challenge`,
+      storyText: `This is placeholder text for Day ${day}. Replace this with your custom story content, clues, and narrative for A Very Sudoku Christmas.`,
+      illustrationUrl: `/placeholder.svg?height=400&width=600&query=sudoku Christmas illustration day ${day}`,
+      clueCardUrl: `/placeholder.svg?height=300&width=400&query=sudoku clue card day ${day}`,
+      doorImageUrl: `/images/doors/door-${day}.svg`,
+      puzzle:
+        day % 3 === 0
+          ? {
+              type: "reveal",
+              revealText: "Tap to reveal the hidden sudoku clue...",
+            }
+          : undefined,
+    }
+  })
+}
+
 // Store all calendar data
 const calendarData: CalendarData = {
   "murder-mistletoe-manor": generateMistletoeManorData(),
   "christmas-conspiracy": generateChristmasConspiracyData(),
+  "a-very-sudoku-christmas": generateSudokuChristmasData(),
 }
 
 export function getDayContent(day: number, calendarId: string): DayContent | undefined {

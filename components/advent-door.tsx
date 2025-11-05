@@ -23,6 +23,12 @@ interface AdventDoorProps {
 }
 
 export function AdventDoor({ day, isUnlocked, isOpened, position, doorImageUrl, onClick, isMobile, calendarId }: AdventDoorProps) {
+  // Check if this is the sudoku calendar - use complete SVG files from "Untitled design (1)" directory
+  const isSudokuCalendar = calendarId === "a-very-sudoku-christmas"
+  // URL encode the directory name to handle spaces and parentheses
+  const directoryName = encodeURIComponent("Untitled design (1)")
+  const sudokuDoorImage = isSudokuCalendar ? `/${directoryName}/${day}.svg` : null
+
   if (isMobile) {
     // Mobile grid layout - same visual style as desktop
     return (
@@ -39,7 +45,7 @@ export function AdventDoor({ day, isUnlocked, isOpened, position, doorImageUrl, 
       >
         <div className="relative w-full h-full flex items-center justify-center">
           <Image
-            src={doorImageUrl || "/placeholder.svg"}
+            src={sudokuDoorImage || doorImageUrl || "/placeholder.svg"}
             alt={`Door ${day}`}
             width={80}
             height={100}
@@ -91,7 +97,7 @@ export function AdventDoor({ day, isUnlocked, isOpened, position, doorImageUrl, 
       <div className="relative w-12 h-16 sm:w-16 sm:h-20 md:w-28 md:h-36">
         <div className="w-full h-full overflow-hidden">
           <Image
-            src={doorImageUrl || "/placeholder.svg"}
+            src={sudokuDoorImage || doorImageUrl || "/placeholder.svg"}
             alt={`Door ${day}`}
             width={112}
             height={144}

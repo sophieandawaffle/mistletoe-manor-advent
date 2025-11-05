@@ -9,15 +9,29 @@ interface DayModalProps {
 }
 
 export function DayModal({ content, onClose }: DayModalProps) {
+  // Check if this is a sudoku puzzle to use a square modal
+  const isSudoku = content.interactiveUrl?.includes('sudoku')
+  
+  // For sudoku, make it wider than tall (width stays the same, height is 2/3)
+  const sudokuStyle = isSudoku ? {
+    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
+    width: `min(calc(100vw - 2rem), calc(100vh - 2rem))`,
+    height: `calc(min(calc(100vw - 2rem), calc(100vh - 2rem)) * 0.67)`,
+    maxWidth: 'min(calc(100vw - 2rem), calc(100vh - 2rem))',
+    maxHeight: `calc(min(calc(100vw - 2rem), calc(100vh - 2rem)) * 0.67)`
+  } : {
+    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
+    maxHeight: 'calc(100vh - 2rem)',
+    height: 'calc(100vh - 2rem)'
+  }
+  
+  const modalMaxWidth = isSudoku ? '' : 'max-w-5xl'
+  
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-1 sm:p-2 md:p-4 bg-black/60 backdrop-blur-sm">
       <div 
-        className="relative w-full max-w-5xl rounded-lg sm:rounded-xl shadow-2xl border-2 border-border transform-none flex flex-col mt-14 sm:mt-0" 
-        style={{ 
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
-          maxHeight: 'calc(100vh - 2rem)',
-          height: 'calc(100vh - 2rem)'
-        }}
+        className={`relative w-full ${modalMaxWidth} rounded-lg sm:rounded-xl shadow-2xl border-2 border-border transform-none flex flex-col mt-14 sm:mt-0`}
+        style={sudokuStyle}
       >
         <button
           onClick={onClose}
