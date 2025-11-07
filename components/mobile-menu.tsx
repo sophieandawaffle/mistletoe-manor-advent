@@ -4,6 +4,7 @@ import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { LogoutButton } from "@/components/logout-button"
+import { CharactersButton } from "@/components/characters-button"
 import { useState } from "react"
 
 interface MobileMenuProps {
@@ -15,6 +16,7 @@ interface MobileMenuProps {
 
 export function MobileMenu({ calendarId, unlockAll, onUnlockAll, onLockDoors }: MobileMenuProps) {
   const [open, setOpen] = useState(false)
+  const isMistletoeManor = calendarId === "murder-mistletoe-manor"
 
   const handleUnlockClick = () => {
     setOpen(false)
@@ -26,13 +28,26 @@ export function MobileMenu({ calendarId, unlockAll, onUnlockAll, onLockDoors }: 
     onLockDoors()
   }
 
+  // Mistletoe Manor styling: burgundy/parchment theme
+  const triggerButtonClass = isMistletoeManor
+    ? "!rotate-0 !skew-x-0 bg-primary/90 hover:bg-primary text-primary-foreground border-primary/50 backdrop-blur-sm"
+    : "!rotate-0 !skew-x-0 bg-slate-900/80 hover:bg-slate-800/90 text-slate-300 hover:text-white border-slate-700/50 backdrop-blur-sm"
+
+  const sheetContentClass = isMistletoeManor
+    ? "w-64 bg-card border-border backdrop-blur-sm"
+    : "w-64 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-slate-700/50 backdrop-blur-sm"
+
+  const menuButtonClass = isMistletoeManor
+    ? "w-40 !rotate-0 !skew-x-0 bg-background hover:bg-secondary/80 text-foreground hover:text-secondary-foreground border-border"
+    : "w-40 !rotate-0 !skew-x-0 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border-slate-600/50"
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button 
           variant="secondary" 
           size="icon" 
-          className="!rotate-0 !skew-x-0 bg-slate-900/80 hover:bg-slate-800/90 text-slate-300 hover:text-white border-slate-700/50 backdrop-blur-sm"
+          className={triggerButtonClass}
         >
           <Menu className="h-5 w-5 !rotate-0 !skew-x-0" />
           <span className="sr-only">Open menu</span>
@@ -40,15 +55,18 @@ export function MobileMenu({ calendarId, unlockAll, onUnlockAll, onLockDoors }: 
       </SheetTrigger>
       <SheetContent 
         side="right" 
-        className="w-64 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-slate-700/50 backdrop-blur-sm"
+        className={sheetContentClass}
       >
         <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
         <div className="flex flex-col items-center gap-4 mt-8">
+          {isMistletoeManor && (
+            <CharactersButton />
+          )}
           {!unlockAll && (
             <Button 
               onClick={handleUnlockClick} 
               variant="outline" 
-              className="w-40 !rotate-0 !skew-x-0 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border-slate-600/50"
+              className={menuButtonClass}
             >
               Unlock All Doors
             </Button>
@@ -57,7 +75,7 @@ export function MobileMenu({ calendarId, unlockAll, onUnlockAll, onLockDoors }: 
             <Button 
               onClick={handleLockClick} 
               variant="outline" 
-              className="w-40 !rotate-0 !skew-x-0 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300 hover:text-white border-slate-600/50"
+              className={menuButtonClass}
             >
               Lock Doors
             </Button>
